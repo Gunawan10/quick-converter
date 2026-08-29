@@ -281,7 +281,8 @@ async function swapConversion(message) {
     value,
     fromUnit,
     targetUnit,
-    originalRate
+    originalRate,
+    originalDate
   } = message;
 
   validateConversionRequest(
@@ -304,7 +305,8 @@ async function swapConversion(message) {
       },
       {
         targetCurrency: targetUnit,
-        rateOverride: 1 / originalRate
+        rateOverride: 1 / originalRate,
+        dateOverride: originalDate || null
       }
     );
   }
