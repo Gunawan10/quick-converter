@@ -1,0 +1,56 @@
+#quick-converter-result .qc-swap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+#quick-converter-result .qc-swap:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+#quick-converter-result .qc-swap:active {
+  transform: scale(0.96);
+}
+
+#quick-converter-result .qc-swap:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.28);
+  outline-offset: 2px;
+}
+
+#quick-converter-result .qc-swap:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+#quick-converter-result .qc-swap-icon {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 120ms ease;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap,
+#quick-converter-result .qc-main.qc-main--currency .qc-swap {
+  width: 100%;
+  height: 24px;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap-icon,
+#quick-converter-result .qc-main.qc-main--currency .qc-swap-icon {
+  transform: rotate(90deg);
+}
