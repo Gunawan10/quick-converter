@@ -280,7 +280,8 @@ async function swapConversion(message) {
     converterType,
     value,
     fromUnit,
-    targetUnit
+    targetUnit,
+    originalRate
   } = message;
 
   validateConversionRequest(
@@ -289,6 +290,24 @@ async function swapConversion(message) {
     fromUnit,
     targetUnit
   );
+
+  if (
+    converterType === 'currency' &&
+    Number.isFinite(originalRate) &&
+    originalRate > 0
+  ) {
+    return convert(
+      {
+        type: 'currency',
+        value,
+        unit: fromUnit
+      },
+      {
+        targetCurrency: targetUnit,
+        rateOverride: 1 / originalRate
+      }
+    );
+  }
 
   return convertWithTarget(
     converterType,
