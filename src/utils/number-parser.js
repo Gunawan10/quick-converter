@@ -1,1 +1,59 @@
-export function parseNumber(value){if(typeof value!=='string')return null;let text=value.trim().replace(/\s/g,'');if(!text||!/^[+-]?[\d.,]+$/.test(text))return null;const signless=text.replace(/^[+-]/,'');if(!/\d/.test(signless))return null;const lastComma=text.lastIndexOf(','),lastDot=text.lastIndexOf('.');if(lastComma!==-1&&lastDot!==-1){if(lastComma>lastDot)text=text.replace(/\./g,'').replace(',','.');else text=text.replace(/,/g,'');}else if(lastComma!==-1){const decimals=text.length-lastComma-1;text=decimals>0&&decimals<=2?text.replace(',','.'):text.replace(/,/g,'');}else if(lastDot!==-1){const parts=text.split('.');if(parts.length>2)text=text.replace(/\./g,'');}const number=Number(text);return Number.isFinite(number)?number:null;}
+export function parseNumber(value) {
+  if (typeof value !== 'string') {
+    return Number.NaN;
+  }
+
+  let text = value
+    .trim()
+    .replace(/\s/g, '');
+
+  if (!text || !/^[+-]?[\d.,]+$/.test(text)) {
+    return Number.NaN;
+  }
+
+  const sign = text.startsWith('-') ? '-' : '';
+  text = text.replace(/^[+-]/, '');
+
+  const lastComma = text.lastIndexOf(',');
+  const lastDot = text.lastIndexOf('.');
+
+  if (lastComma !== -1 && lastDot !== -1) {
+    text = normalizeMixedSeparators(text, lastComma, lastDot);
+  } else if (lastComma !== -1) {
+    text = normalizeSingleSeparator(text, ',');
+  } else if (lastDot !== -1) {
+    text = normalizeSingleSeparator(text, '.');
+  }
+
+  const parsed = Number(`${sign}${text}`);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : Number.NaN;
+}
+
+function normalizeMixedSeparators(text, lastComma, lastDot) {
+  if (lastComma > lastDot) {
+    return text
+      .replace(/\./g, '')
+      .replace(',', '.');
+  }
+
+  return text.replace(/,/g, '');
+}
+
+function normalizeSingleSeparator(text, separator) {
+  const index = text.lastIndexOf(separator);
+  const decimals = text.length - index - 1;
+  const separatorPattern = separator === '.' ? /\./g : /,/g;
+
+  if (decimals === 3 && text.indexOf(separator) === index) {
+    return text.replace(separatorPattern, '');
+  }
+
+  if (separator === ',') {
+    return text.replace(',', '.');
+  }
+
+  return text;
+}

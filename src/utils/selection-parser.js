@@ -1,9 +1,111 @@
 import { CURRENCIES } from '../constants/currencies.js';
-import { resolveUnit } from '../constants/units.js';
+import {
+  findUnitByAlias,
+  UNIT_TYPES
+} from '../constants/units.js';
 import { parseNumber } from './number-parser.js';
-const CURRENCY_CODES=Object.keys(CURRENCIES).join('|');
-const CODE_RE=new RegExp(`^([+-]?[\\d.,]+)\\s*(${CURRENCY_CODES})$`,'i');
-const PREFIX_CODE_RE=new RegExp(`^(${CURRENCY_CODES})\\s*([+-]?[\\d.,]+)$`,'i');
-const SYMBOLS=[['CN¥','CNY'],['A$','AUD'],['C$','CAD'],['HK$','HKD'],['NZ$','NZD'],['S$','SGD'],['Rp','IDR'],['RM','MYR'],['$','USD'],['€','EUR'],['£','GBP'],['₩','KRW'],['₹','INR'],['฿','THB'],['¥','JPY']];
-export function parseSelection(text){const value=String(text??'').trim();if(!value)return null;const currency=parseCurrency(value);if(currency)return currency;const match=value.match(/^([+-]?[\d.,]+)\s*(.+)$/u);if(!match)return null;const numericValue=parseNumber(match[1]);if(numericValue===null)return null;const resolved=resolveUnit(match[2]);if(!resolved)return null;return{type:resolved.type,value:numericValue,unit:resolved.unit};}
-function parseCurrency(value){let match=value.match(CODE_RE);if(match){const amount=parseNumber(match[1]);if(amount===null||amount<0)return null;return{type:'currency',value:amount,unit:match[2].toUpperCase()};}match=value.match(PREFIX_CODE_RE);if(match){const amount=parseNumber(match[2]);if(amount===null||amount<0)return null;return{type:'currency',value:amount,unit:match[1].toUpperCase()};}for(const [symbol,code] of SYMBOLS){if(!value.startsWith(symbol))continue;const amount=parseNumber(value.slice(symbol.length));if(amount===null||amount<0)return null;return{type:'currency',value:amount,unit:code};}return null;}
+
+const CURRENCY_SYMBOLS = [
+  { code: 'USD', pattern: /^\$/ },
+  { code: 'EUR', pattern: /^€/ },
+  { code: 'GBP', pattern: /^£/ },
+  { code: 'JPY', pattern: /^¥/ },
+  { code: 'CNY', pattern: /^CN¥/i },
+  { code: 'KRW', pattern: /^₩/ },
+  { code: 'INR', pattern: /^₹/ },
+  { code: 'THB', pattern: /^฿/ }
+];
+
+const CURRENCY_CODES = Object.keys(CURRENCIES);
+const CURRENCY_CODE_PATTERN = new RegExp(
+  `\\b(${CURRENCY_CODES.join('|')})\\b`,
+  'i'
+);
+
+export function parseSelection(text) {
+  const value = text?.trim();
+
+  if (!value) {
+    return null;
+  }
+
+  return (
+    parseCurrencySelection(value) ||
+    parseUnitSelection(value)
+  );
+}
+
+function parseCurrencySelection(text) {
+  const currency = resolveCurrency(text);
+
+  if (!currency) {
+    return null;
+  }
+
+  const numberText = text
+    .replace(CURRENCY_CODE_PATTERN, '')
+    .replace(/CN¥|[$€£¥₩₹฿]/gi, '')
+    .trim();
+
+  const value = parseNumber(numberText);
+
+  if (!Number.isFinite(value) || value <= 0) {
+    return null;
+  }
+
+  return {
+    type: 'currency',
+    value,
+    unit: currency
+  };
+}
+
+function resolveCurrency(text) {
+  const codeMatch = text.match(CURRENCY_CODE_PATTERN);
+
+  if (codeMatch) {
+    return codeMatch[1].toUpperCase();
+  }
+
+  return CURRENCY_SYMBOLS.find(({ pattern }) =>
+    pattern.test(text)
+  )?.code || null;
+}
+
+function parseUnitSelection(text) {
+  const match = text.match(
+    /^\s*([+-]?[\d.,]+)\s*([^\d\s].*?)\s*$/u
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const value = parseNumber(match[1]);
+
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  const rawUnit = match[2].trim();
+
+  for (const type of UNIT_TYPES) {
+    const unit = findUnitByAlias(type, rawUnit);
+
+    if (!unit) {
+      continue;
+    }
+
+    if (type !== 'temperature' && value < 0) {
+      return null;
+    }
+
+    return {
+      type,
+      value,
+      unit
+    };
+  }
+
+  return null;
+}

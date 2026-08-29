@@ -1,3 +1,59 @@
-import { UNIT_TYPES } from '../constants/units.js';
-export function convertUnit(type,value,fromUnit,toUnit){if(!Number.isFinite(value))throw new Error('Invalid numeric value');if(type==='temperature')return convertTemperature(value,fromUnit,toUnit);const config=UNIT_TYPES[type],from=config?.units?.[fromUnit],to=config?.units?.[toUnit];if(!from||!to)throw new Error('Unsupported unit conversion');if(type==='data')return value*from.bytes/to.bytes;return value*from.factor/to.factor;}
-function convertTemperature(value,from,to){if(from===to)return value;let c;if(from==='°C')c=value;else if(from==='°F')c=(value-32)*5/9;else if(from==='K')c=value-273.15;else throw new Error('Unsupported temperature unit');if(to==='°C')return c;if(to==='°F')return c*9/5+32;if(to==='K')return c+273.15;throw new Error('Unsupported temperature target');}
+import { UNITS } from '../constants/units.js';
+
+export function convertUnit(type, value, fromUnit, toUnit) {
+  if (type === 'temperature') {
+    return convertTemperature(value, fromUnit, toUnit);
+  }
+
+  const units = UNITS[type];
+  const from = units?.[fromUnit];
+  const to = units?.[toUnit];
+
+  if (!from || !to) {
+    throw new Error('Unsupported unit conversion.');
+  }
+
+  const baseValue = value * from.factor;
+
+  return baseValue / to.factor;
+}
+
+function convertTemperature(value, fromUnit, toUnit) {
+  if (!UNITS.temperature[fromUnit] || !UNITS.temperature[toUnit]) {
+    throw new Error('Unsupported temperature unit.');
+  }
+
+  if (fromUnit === toUnit) {
+    return value;
+  }
+
+  const celsius = toCelsius(value, fromUnit);
+
+  return fromCelsius(celsius, toUnit);
+}
+
+function toCelsius(value, unit) {
+  switch (unit) {
+    case 'c':
+      return value;
+    case 'f':
+      return (value - 32) * (5 / 9);
+    case 'k':
+      return value - 273.15;
+    default:
+      throw new Error('Unsupported temperature unit.');
+  }
+}
+
+function fromCelsius(value, unit) {
+  switch (unit) {
+    case 'c':
+      return value;
+    case 'f':
+      return value * (9 / 5) + 32;
+    case 'k':
+      return value + 273.15;
+    default:
+      throw new Error('Unsupported temperature unit.');
+  }
+}
