@@ -1,6 +1,8 @@
 (() => {
   const SELECTION_DELAY_MS = 180;
   const MAX_SELECTION_LENGTH = 80;
+  const UI_SELECTOR =
+    '#quick-converter-trigger, #quick-converter-result';
 
   let selectionTimer = null;
 
@@ -26,15 +28,28 @@
       return;
     }
 
-    scheduleSelectionDetection();
+    scheduleSelectionDetection(event);
   }
 
-  function scheduleSelectionDetection() {
+  function scheduleSelectionDetection(event) {
+    if (isExtensionUiEvent(event)) {
+      return;
+    }
+
     clearTimeout(selectionTimer);
 
     selectionTimer = setTimeout(
       detectCurrentSelection,
       SELECTION_DELAY_MS
+    );
+  }
+
+  function isExtensionUiEvent(event) {
+    const target = event?.target;
+
+    return Boolean(
+      target instanceof Element &&
+      target.closest(UI_SELECTOR)
     );
   }
 
