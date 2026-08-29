@@ -36,6 +36,7 @@
       ],
       "js": [
         "src/content/result-ui.js",
+        "src/content/positioning-control.js",
         "src/content/adaptive-layout.js",
         "src/content/swap-control.js",
         "src/content/mockup-layout.js",
