@@ -57,6 +57,14 @@
 
     const trigger = document.getElementById('quick-converter-trigger');
     const card = document.getElementById('quick-converter-result');
+    const anchorVisible = isAnchorVisible(rect);
+
+    setVisibility(trigger, anchorVisible);
+    setVisibility(card, anchorVisible);
+
+    if (!anchorVisible) {
+      return;
+    }
 
     if (trigger) {
       positionTrigger(trigger, rect);
@@ -96,6 +104,27 @@
       width: fallbackDocumentRect.width,
       height: fallbackDocumentRect.height
     };
+  }
+
+  function isAnchorVisible(rect) {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+
+    return (
+      rect.bottom > 0 &&
+      rect.top < viewportHeight &&
+      rect.right > 0 &&
+      rect.left < viewportWidth
+    );
+  }
+
+  function setVisibility(element, visible) {
+    if (!element) {
+      return;
+    }
+
+    element.style.visibility = visible ? 'visible' : 'hidden';
+    element.style.pointerEvents = visible ? '' : 'none';
   }
 
   function positionTrigger(trigger, rect) {
@@ -140,11 +169,6 @@
     if (top + height > viewportHeight - margin) {
       top = rect.top - height - gap;
     }
-
-    top = Math.max(
-      margin,
-      Math.min(top, viewportHeight - height - margin)
-    );
 
     card.style.left = `${left}px`;
     card.style.top = `${top}px`;
