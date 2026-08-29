@@ -100,6 +100,12 @@
     state.currentConversion = data.success ? data : null;
     state.resultElement = document.createElement('div');
     state.resultElement.id = 'quick-converter-result';
+
+    if (data.success) {
+      state.resultElement.dataset.conversionDate = data.date || '';
+      state.resultElement.dataset.provider = data.provider || '';
+    }
+
     state.resultElement.innerHTML = data.success
       ? buildSuccessMarkup(data)
       : buildErrorMarkup(data);
