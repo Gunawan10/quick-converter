@@ -1,11 +1,4 @@
 (() => {
-  const originalShowResult = QuickConverterContent.showResult;
-
-  QuickConverterContent.showResult = function showAdaptiveResult(data) {
-    originalShowResult(data);
-    applyAdaptiveLayout();
-  };
-
   function applyAdaptiveLayout() {
     const main = document.querySelector(
       '#quick-converter-result .qc-main'
@@ -34,4 +27,9 @@
   function isOverflowing(element) {
     return element.scrollWidth > element.clientWidth + 1;
   }
+
+  globalThis.QuickConverterContent = {
+    ...(globalThis.QuickConverterContent || {}),
+    applyAdaptiveLayout
+  };
 })();
