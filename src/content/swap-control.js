@@ -49,8 +49,13 @@
       ?.trim();
     const originalSourceUnit = getOriginalSourceUnit(card);
     const converterType = getConverterType(card);
+    const sourceValue = parseDisplayedNumber(source);
     const swappedValue = parseDisplayedNumber(result);
-    const originalRate = getOriginalRate(card);
+    const originalRate = getDisplayedRate(
+      sourceValue,
+      swappedValue,
+      card
+    );
     const originalDate = card.dataset.conversionDate || null;
     const originalProvider = card.dataset.provider || null;
 
@@ -98,7 +103,19 @@
     return match?.[1]?.trim() || null;
   }
 
-  function getOriginalRate(card) {
+  function getDisplayedRate(sourceValue, resultValue, card) {
+    if (
+      Number.isFinite(sourceValue) &&
+      Number.isFinite(resultValue) &&
+      sourceValue !== 0
+    ) {
+      return resultValue / sourceValue;
+    }
+
+    return getRateFromMetadata(card);
+  }
+
+  function getRateFromMetadata(card) {
     const rateText = getRateText(card);
     const match = rateText?.match(/=\s*([\d.,]+)\s+/);
 
