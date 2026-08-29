@@ -127,11 +127,14 @@
   function buildBrandMarkup() {
     return `
       <div class="qc-brand">
-        <img
-          class="qc-logo"
-          src="${ICON_URL}"
-          alt="Quick Converter"
-        />
+        <span class="qc-logo-wrap">
+          <img
+            class="qc-logo"
+            src="${ICON_URL}"
+            alt=""
+            aria-hidden="true"
+          />
+        </span>
         <strong>Quick Converter</strong>
       </div>
     `;
@@ -151,64 +154,84 @@
   }
 
   function buildSuccessMarkup(data) {
-    const category = data.type.toUpperCase();
-    const targetSelect = buildTargetSelect(data);
+    const targetDropdown = buildTargetDropdown(data);
     const metadata = buildMetadata(data);
-    const liveRateLink = buildLiveRateLink(data);
+    const footerLeft = buildFooterLeft(data);
 
     return `
       <div class="qc-header">
         ${buildBrandMarkup()}
-        ${targetSelect}
+        ${targetDropdown}
       </div>
 
-      <div class="qc-conversion">
-        <div>
-          <span class="qc-code">${escapeHtml(data.fromUnit)}</span>
-          <span class="qc-value">${escapeHtml(data.source)}</span>
-        </div>
+      <div class="qc-main">
+        <strong class="qc-main-value qc-source">
+          ${escapeHtml(data.source)}
+        </strong>
 
-        <span class="qc-arrow">≈</span>
+        <span class="qc-arrow" aria-hidden="true">≈</span>
 
-        <div class="qc-right">
-          <span class="qc-code">${escapeHtml(data.toUnit)}</span>
-          <strong class="qc-value qc-result">${escapeHtml(data.result)}</strong>
-        </div>
-      </div>
-
-      <div class="qc-footer">
-        <span>${escapeHtml(category)}</span>
-        <button class="qc-copy" type="button">Copy result</button>
+        <strong class="qc-main-value qc-result">
+          ${escapeHtml(data.result)}
+        </strong>
       </div>
 
       ${metadata}
-      ${liveRateLink}
+
+      <div class="qc-footer">
+        <div class="qc-footer-left">
+          ${footerLeft}
+        </div>
+
+        <button class="qc-copy" type="button">
+          ${copyIcon()}
+          <span>Copy</span>
+        </button>
+      </div>
     `;
   }
 
-  function buildTargetSelect(data) {
-    const options = (data.targets || [])
+  function buildTargetDropdown(data) {
+    const items = (data.targets || [])
       .map((target) => {
-        const selected = target.value === data.toUnit
-          ? 'selected'
-          : '';
+        const selected = target.value === data.toUnit;
 
         return `
-          <option value="${escapeHtml(target.value)}" ${selected}>
-            ${escapeHtml(target.label)}
-          </option>
+          <button
+            class="qc-target-option${selected ? ' is-selected' : ''}"
+            type="button"
+            data-value="${escapeHtml(target.value)}"
+            role="option"
+            aria-selected="${selected}"
+          >
+            <span class="qc-target-code">${escapeHtml(target.value)}</span>
+            <span class="qc-target-name">${escapeHtml(getTargetName(target))}</span>
+          </button>
         `;
       })
       .join('');
 
     return `
-      <select
-        class="qc-select"
-        aria-label="Target ${escapeHtml(data.type)}"
-        title="Change target"
-      >
-        ${options}
-      </select>
+      <div class="qc-target-dropdown">
+        <button
+          class="qc-target-button"
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          title="Change target"
+        >
+          <span>${escapeHtml(data.toUnit)}</span>
+          <span class="qc-chevron" aria-hidden="true">⌄</span>
+        </button>
+
+        <div
+          class="qc-target-menu"
+          role="listbox"
+          hidden
+        >
+          ${items}
+        </div>
+      </div>
     `;
   }
 
@@ -217,29 +240,39 @@
       return '';
     }
 
-    const baseRate = `
+    const rateLine = `
       1 ${escapeHtml(data.fromUnit)} =
       ${formatNumber(data.rate, 6)} ${escapeHtml(data.toUnit)}
     `;
 
     if (data.type !== 'currency') {
-      return `<div class="qc-meta">${baseRate}</div>`;
+      return `
+        <div class="qc-meta-panel">
+          <div class="qc-rate-line">${rateLine}</div>
+        </div>
+      `;
     }
 
-    const date = data.date
-      ? ` · ${escapeHtml(data.date)}`
-      : '';
+    const providerLine = [data.provider, formatDate(data.date)]
+      .filter(Boolean)
+      .map(escapeHtml)
+      .join(' · ');
 
     return `
-      <div class="qc-meta">
-        ${baseRate} · ${escapeHtml(data.provider)}${date}
+      <div class="qc-meta-panel">
+        <div class="qc-rate-line">${rateLine}</div>
+        ${providerLine
+          ? `<div class="qc-provider-line">${providerLine}</div>`
+          : ''}
       </div>
     `;
   }
 
-  function buildLiveRateLink(data) {
+  function buildFooterLeft(data) {
     if (data.type !== 'currency') {
-      return '';
+      return `
+        <span class="qc-category">${escapeHtml(formatType(data.type))}</span>
+      `;
     }
 
     const query = `${data.value} ${data.fromUnit} to ${data.toUnit}`;
@@ -252,14 +285,15 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        View live rate on Google →
+        View live rate on Google
+        <span aria-hidden="true">↗</span>
       </a>
     `;
   }
 
   function bindResultEvents() {
     bindCopyButton();
-    bindTargetSelect();
+    bindTargetDropdown();
 
     state.resultElement
       ?.querySelector('.qc-live-rate')
@@ -286,56 +320,98 @@
       }
 
       await navigator.clipboard.writeText(value);
-      copyButton.textContent = 'Copied';
+
+      const label = copyButton.querySelector('span:last-child');
+
+      if (label) {
+        label.textContent = 'Copied';
+      }
 
       setTimeout(() => {
-        if (copyButton.isConnected) {
-          copyButton.textContent = 'Copy result';
+        if (label?.isConnected) {
+          label.textContent = 'Copy';
         }
       }, 1200);
     });
   }
 
-  function bindTargetSelect() {
-    const select = state.resultElement?.querySelector(
-      '.qc-select'
+  function bindTargetDropdown() {
+    const dropdown = state.resultElement?.querySelector(
+      '.qc-target-dropdown'
     );
+    const button = dropdown?.querySelector('.qc-target-button');
+    const menu = dropdown?.querySelector('.qc-target-menu');
 
-    select?.addEventListener('mousedown', (event) => {
+    if (!dropdown || !button || !menu) {
+      return;
+    }
+
+    dropdown.addEventListener('mousedown', (event) => {
       event.stopPropagation();
     });
 
-    select?.addEventListener('click', (event) => {
+    dropdown.addEventListener('click', (event) => {
       event.stopPropagation();
     });
 
-    select?.addEventListener('change', async (event) => {
-      event.stopPropagation();
+    button.addEventListener('click', () => {
+      const isOpen = !menu.hidden;
+      setTargetMenuOpen(dropdown, !isOpen);
+    });
 
-      if (!state.currentConversion) {
-        return;
-      }
+    menu.querySelectorAll('.qc-target-option').forEach((option) => {
+      option.addEventListener('click', async () => {
+        await changeTarget(option.dataset.value, dropdown);
+      });
+    });
 
-      select.disabled = true;
-
-      try {
-        const result = await chrome.runtime.sendMessage({
-          type: 'CHANGE_TARGET',
-          converterType: state.currentConversion.type,
-          value: state.currentConversion.value,
-          fromUnit: state.currentConversion.fromUnit,
-          targetUnit: event.target.value
-        });
-
-        if (result?.success) {
-          showResult(result);
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setTargetMenuOpen(dropdown, false);
+          button.focus();
         }
-      } finally {
-        if (select.isConnected) {
-          select.disabled = false;
-        }
+      },
+      { once: true }
+    );
+  }
+
+  async function changeTarget(targetUnit, dropdown) {
+    if (!state.currentConversion || !targetUnit) {
+      return;
+    }
+
+    const button = dropdown.querySelector('.qc-target-button');
+    button.disabled = true;
+    setTargetMenuOpen(dropdown, false);
+
+    try {
+      const result = await chrome.runtime.sendMessage({
+        type: 'CHANGE_TARGET',
+        converterType: state.currentConversion.type,
+        value: state.currentConversion.value,
+        fromUnit: state.currentConversion.fromUnit,
+        targetUnit
+      });
+
+      if (result?.success) {
+        showResult(result);
       }
-    });
+    } finally {
+      if (button.isConnected) {
+        button.disabled = false;
+      }
+    }
+  }
+
+  function setTargetMenuOpen(dropdown, isOpen) {
+    const button = dropdown.querySelector('.qc-target-button');
+    const menu = dropdown.querySelector('.qc-target-menu');
+
+    menu.hidden = !isOpen;
+    button.setAttribute('aria-expanded', String(isOpen));
+    dropdown.classList.toggle('is-open', isOpen);
   }
 
   function positionTrigger() {
@@ -344,7 +420,7 @@
     }
 
     const margin = 8;
-    const gap = 6;
+    const gap = 7;
     const rect = state.selectionRect;
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
@@ -408,9 +484,38 @@
     state.resultElement.style.top = `${top}px`;
   }
 
+  function getTargetName(target) {
+    const label = String(target.label || target.value || '');
+    const separatorIndex = label.indexOf('—');
+
+    if (separatorIndex === -1) {
+      return label === target.value ? '' : label;
+    }
+
+    return label.slice(separatorIndex + 1).trim();
+  }
+
   function formatType(type) {
     return String(type || '')
       .replace(/^./, (char) => char.toUpperCase());
+  }
+
+  function formatDate(date) {
+    if (!date) {
+      return '';
+    }
+
+    const parsed = new Date(`${date}T00:00:00`);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return date;
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(parsed);
   }
 
   function escapeHtml(value) {
@@ -423,6 +528,20 @@
     return new Intl.NumberFormat('en-US', {
       maximumFractionDigits: digits
     }).format(value);
+  }
+
+  function copyIcon() {
+    return `
+      <svg
+        class="qc-copy-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect x="6.5" y="6.5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.5" />
+        <path d="M4.5 12.5H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h6.5a2 2 0 0 1 2 2v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    `;
   }
 
   globalThis.QuickConverterContent = {
