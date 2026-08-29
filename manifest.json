@@ -32,7 +32,8 @@
         "src/content/content.css",
         "src/content/adaptive-layout.css",
         "src/content/swap-control.css",
-        "src/content/theme.css"
+        "src/content/theme.css",
+        "src/content/stacked-side-layout.css"
       ],
       "js": [
         "src/content/result-ui.js",
