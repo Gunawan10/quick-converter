@@ -1,0 +1,84 @@
+#quick-converter-result .qc-main.qc-main--stacked {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  grid-template-rows: auto auto;
+  align-items: stretch;
+  column-gap: 14px;
+  row-gap: 14px;
+  padding: 18px;
+  text-align: left;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-value-block {
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+  text-align: left;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-value-block--source {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-value-block--result {
+  grid-column: 1;
+  grid-row: 2;
+  align-items: flex-start;
+  padding-top: 14px;
+  border-top: 1px solid var(--qc-border);
+  text-align: left;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-main-value,
+#quick-converter-result .qc-main.qc-main--stacked .qc-source,
+#quick-converter-result .qc-main.qc-main--stacked .qc-result {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  text-align: left;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-result {
+  color: var(--qc-accent-strong);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  justify-self: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap-icon {
+  transform: rotate(90deg);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap::before,
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap::after {
+  display: none;
+  content: none;
+}
+
+@media (max-width: 380px) {
+  #quick-converter-result .qc-main.qc-main--stacked {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    column-gap: 10px;
+    row-gap: 12px;
+    padding: 16px;
+  }
+
+  #quick-converter-result .qc-main.qc-main--stacked .qc-value-block--result {
+    padding-top: 12px;
+  }
+
+  #quick-converter-result .qc-main.qc-main--stacked .qc-swap {
+    width: 36px;
+    height: 36px;
+  }
+}
