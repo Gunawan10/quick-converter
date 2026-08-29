@@ -1,0 +1,256 @@
+#quick-converter-result {
+  --qc-accent: #6366f1;
+  --qc-accent-strong: #4f46e5;
+  --qc-accent-soft: #eef2ff;
+  --qc-accent-softer: #f7f7ff;
+  --qc-accent-border: #c7d2fe;
+  --qc-ink: #0f172a;
+  --qc-muted: #64748b;
+  --qc-border: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.26);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--qc-ink);
+  box-shadow:
+    0 24px 64px rgba(15, 23, 42, 0.16),
+    0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+#quick-converter-result[data-converter-type='length'] {
+  --qc-accent: #3b82f6;
+  --qc-accent-strong: #2563eb;
+  --qc-accent-soft: #eff6ff;
+  --qc-accent-softer: #f8fbff;
+  --qc-accent-border: #bfdbfe;
+}
+
+#quick-converter-result[data-converter-type='weight'] {
+  --qc-accent: #10b981;
+  --qc-accent-strong: #059669;
+  --qc-accent-soft: #ecfdf5;
+  --qc-accent-softer: #f6fffb;
+  --qc-accent-border: #a7f3d0;
+}
+
+#quick-converter-result[data-converter-type='temperature'] {
+  --qc-accent: #f97316;
+  --qc-accent-strong: #ea580c;
+  --qc-accent-soft: #fff7ed;
+  --qc-accent-softer: #fffaf5;
+  --qc-accent-border: #fed7aa;
+}
+
+#quick-converter-result[data-converter-type='data'] {
+  --qc-accent: #8b5cf6;
+  --qc-accent-strong: #7c3aed;
+  --qc-accent-soft: #f5f3ff;
+  --qc-accent-softer: #faf8ff;
+  --qc-accent-border: #ddd6fe;
+}
+
+#quick-converter-result .qc-header {
+  min-height: 60px;
+  padding: 11px 13px;
+  border-bottom-color: rgba(148, 163, 184, 0.18);
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(135deg, var(--qc-accent-softer), #ffffff 76%);
+}
+
+#quick-converter-result .qc-header::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  border-radius: 18px 0 0 0;
+  background: var(--qc-accent);
+  content: '';
+}
+
+#quick-converter-result .qc-logo-wrap {
+  border-color: var(--qc-accent-border);
+  border-radius: 11px;
+  background: var(--qc-accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+#quick-converter-result .qc-brand strong {
+  color: var(--qc-ink);
+  font-size: 14.5px;
+  font-weight: 750;
+}
+
+#quick-converter-result .qc-target-button {
+  min-width: 70px;
+  height: 36px;
+  border-color: var(--qc-accent-border);
+  border-radius: 10px;
+  background: var(--qc-accent-soft);
+  color: var(--qc-accent-strong);
+  font-weight: 700;
+}
+
+#quick-converter-result .qc-target-button:hover {
+  border-color: var(--qc-accent);
+  background: var(--qc-accent-softer);
+}
+
+#quick-converter-result .qc-target-button:focus-visible {
+  border-color: var(--qc-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--qc-accent) 18%, transparent);
+}
+
+#quick-converter-result .qc-chevron {
+  color: var(--qc-accent-strong);
+}
+
+#quick-converter-result .qc-target-menu {
+  border-color: rgba(148, 163, 184, 0.24);
+  border-radius: 12px;
+  box-shadow:
+    0 18px 42px rgba(15, 23, 42, 0.16),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+#quick-converter-result .qc-target-option {
+  border-radius: 9px;
+}
+
+#quick-converter-result .qc-target-option:hover {
+  background: var(--qc-accent-softer);
+}
+
+#quick-converter-result .qc-target-option.is-selected {
+  background: var(--qc-accent-soft);
+  color: var(--qc-accent-strong);
+}
+
+#quick-converter-result .qc-main {
+  padding-top: 22px;
+  padding-bottom: 18px;
+}
+
+#quick-converter-result .qc-main-value {
+  color: var(--qc-ink);
+  font-weight: 750;
+}
+
+#quick-converter-result .qc-result {
+  color: var(--qc-accent-strong);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-result,
+#quick-converter-result .qc-main.qc-main--currency .qc-result {
+  color: var(--qc-accent-strong);
+}
+
+#quick-converter-result .qc-meta-panel {
+  margin: 0 12px 13px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--qc-accent-border) 62%, #ffffff);
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--qc-accent-soft), #f8fafc 85%);
+  color: #334155;
+}
+
+#quick-converter-result .qc-rate-line {
+  color: #334155;
+  font-weight: 600;
+}
+
+#quick-converter-result .qc-provider-line {
+  color: var(--qc-muted);
+}
+
+#quick-converter-result .qc-footer {
+  min-height: 52px;
+  padding: 9px 12px 10px;
+  border-top-color: rgba(148, 163, 184, 0.18);
+  border-radius: 0 0 18px 18px;
+  background: #fcfdff;
+}
+
+#quick-converter-result .qc-category {
+  color: var(--qc-accent-strong);
+  font-weight: 650;
+}
+
+#quick-converter-result .qc-live-rate {
+  color: var(--qc-accent-strong);
+  font-weight: 600;
+}
+
+#quick-converter-result .qc-copy {
+  min-width: 76px;
+  height: 34px;
+  border-color: var(--qc-accent-border);
+  border-radius: 10px;
+  background: var(--qc-accent-soft);
+  color: var(--qc-accent-strong);
+  font-weight: 600;
+}
+
+#quick-converter-result .qc-copy:hover {
+  border-color: var(--qc-accent);
+  background: var(--qc-accent-softer);
+}
+
+#quick-converter-result .qc-swap {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--qc-accent-border);
+  border-radius: 50%;
+  background: var(--qc-accent-soft);
+  color: var(--qc-accent-strong);
+  box-shadow:
+    0 5px 14px color-mix(in srgb, var(--qc-accent) 14%, transparent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+#quick-converter-result .qc-swap:hover {
+  border-color: var(--qc-accent);
+  background: #ffffff;
+  color: var(--qc-accent-strong);
+  transform: translateY(-1px);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap,
+#quick-converter-result .qc-main.qc-main--currency .qc-swap {
+  width: 34px;
+  height: 34px;
+  margin: 1px auto;
+}
+
+#quick-converter-result .qc-swap:focus-visible {
+  outline-color: color-mix(in srgb, var(--qc-accent) 35%, transparent);
+}
+
+#quick-converter-trigger {
+  border-color: #c7d2fe;
+  background: linear-gradient(145deg, #ffffff, #eef2ff);
+  box-shadow:
+    0 10px 28px rgba(79, 70, 229, 0.18),
+    0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+#quick-converter-trigger:hover {
+  border-color: #a5b4fc;
+  background: #f5f3ff;
+  box-shadow:
+    0 12px 32px rgba(79, 70, 229, 0.22),
+    0 4px 10px rgba(15, 23, 42, 0.1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #quick-converter-result,
+  #quick-converter-result .qc-target-button,
+  #quick-converter-result .qc-copy,
+  #quick-converter-result .qc-swap {
+    transition:
+      border-color 140ms ease,
+      background 140ms ease,
+      color 140ms ease,
+      box-shadow 140ms ease,
+      transform 140ms ease;
+  }
+}
