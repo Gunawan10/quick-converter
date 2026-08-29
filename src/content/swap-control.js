@@ -50,6 +50,7 @@
     const originalSourceUnit = getOriginalSourceUnit(card);
     const converterType = getConverterType(card);
     const swappedValue = parseDisplayedNumber(result);
+    const originalRate = getOriginalRate(card);
 
     if (
       !source ||
@@ -70,7 +71,10 @@
         converterType,
         value: swappedValue,
         fromUnit: currentTarget,
-        targetUnit: originalSourceUnit
+        targetUnit: originalSourceUnit,
+        originalRate: Number.isFinite(originalRate)
+          ? originalRate
+          : null
       });
 
       if (response?.success) {
@@ -84,15 +88,25 @@
   }
 
   function getOriginalSourceUnit(card) {
-    const rateText = card
+    const rateText = getRateText(card);
+    const match = rateText?.match(/^1\s+(.+?)\s+=/);
+
+    return match?.[1]?.trim() || null;
+  }
+
+  function getOriginalRate(card) {
+    const rateText = getRateText(card);
+    const match = rateText?.match(/=\s*([\d.,]+)\s+/);
+
+    return match ? parseRateNumber(match[1]) : NaN;
+  }
+
+  function getRateText(card) {
+    return card
       .querySelector('.qc-rate-line')
       ?.textContent
       ?.replace(/\s+/g, ' ')
       ?.trim();
-
-    const match = rateText?.match(/^1\s+(.+?)\s+=/);
-
-    return match?.[1]?.trim() || null;
   }
 
   function getConverterType(card) {
@@ -107,6 +121,11 @@
       ?.toLowerCase();
 
     return category || null;
+  }
+
+  function parseRateNumber(text) {
+    const normalized = String(text).replace(/,/g, '');
+    return Number(normalized);
   }
 
   function parseDisplayedNumber(text) {
