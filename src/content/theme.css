@@ -54,21 +54,16 @@
 #quick-converter-result .qc-header {
   min-height: 66px;
   padding: 13px 15px;
-  overflow: hidden;
+  overflow: visible;
   border-bottom: 1px solid var(--qc-border);
   border-radius: 20px 20px 0 0;
   background: linear-gradient(135deg, var(--qc-accent-softer) 0%, #ffffff 78%);
+  box-shadow: inset 4px 0 0 var(--qc-accent);
 }
 
 #quick-converter-result .qc-header::before {
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: 8px;
-  width: 4px;
-  border-radius: 999px;
-  background: var(--qc-accent);
-  content: '';
+  display: none;
+  content: none;
 }
 
 #quick-converter-result .qc-brand {
