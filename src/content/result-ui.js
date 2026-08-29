@@ -157,6 +157,9 @@
     const targetDropdown = buildTargetDropdown(data);
     const metadata = buildMetadata(data);
     const footerLeft = buildFooterLeft(data);
+    const mainClass = data.type === 'currency'
+      ? 'qc-main qc-main--currency'
+      : 'qc-main';
 
     return `
       <div class="qc-header">
@@ -164,7 +167,7 @@
         ${targetDropdown}
       </div>
 
-      <div class="qc-main">
+      <div class="${mainClass}">
         <strong class="qc-main-value qc-source">
           ${escapeHtml(data.source)}
         </strong>
