@@ -1,4 +1,42 @@
 (() => {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) {
+          continue;
+        }
+
+        if (
+          node.id === 'quick-converter-result' ||
+          node.querySelector?.('#quick-converter-result')
+        ) {
+          requestAnimationFrame(applyAdaptiveLayout);
+          return;
+        }
+      }
+    }
+  });
+
+  observeResultCards();
+
+  function observeResultCards() {
+    const root = document.documentElement;
+
+    if (!root) {
+      document.addEventListener(
+        'DOMContentLoaded',
+        observeResultCards,
+        { once: true }
+      );
+      return;
+    }
+
+    observer.observe(root, {
+      childList: true,
+      subtree: true
+    });
+  }
+
   function applyAdaptiveLayout() {
     const main = document.querySelector(
       '#quick-converter-result .qc-main'
