@@ -1,6 +1,6 @@
 # Quick Converter
 
-Chrome Extension (Manifest V3) untuk mengonversi nilai langsung dari teks yang dipilih di webpage tanpa harus membuka converter terpisah.
+Chrome Extension untuk mengonversi nilai langsung dari teks yang dipilih di webpage tanpa harus membuka converter terpisah.
 
 Quick Converter fokus ke flow cepat:
 
@@ -10,20 +10,16 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 
 ## Features
 
-- Convert langsung dari selected text di webpage.
-- Small trigger icon muncul dekat selection sebelum result card dibuka.
-- Context menu `Quick Convert` sebagai alternatif trigger.
-- Floating result card dekat teks yang dipilih.
-- Target dropdown langsung dari result card.
-- Swap / reverse conversion dengan tombol di tengah source dan result.
-- Adaptive result layout:
-  - nilai pendek tampil horizontal;
-  - nilai panjang otomatis stacked dan centered.
-- Copy hasil conversion dengan satu klik.
-- Currency menampilkan exchange rate, provider, dan last updated date.
-- Link `View live rate on Google` untuk currency.
-- Currency target mengikuti saved preference / browser locale, fallback `IDR`.
-- Unsupported selection diabaikan tanpa mengganggu webpage.
+- **Instant Selection Conversion** — select teks di webpage, lalu klik Quick Converter icon yang muncul dekat selection untuk melihat hasil langsung.
+- **Multiple Converter Types** — support currency, length, weight, temperature, dan data size.
+- **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, dan `100 MB`.
+- **Quick Target Switching** — ganti target unit atau currency langsung dari dropdown di result card.
+- **Reverse Conversion** — balik arah conversion dengan tombol swap tanpa harus select ulang teks.
+- **Adaptive Result Card** — nilai pendek tampil horizontal, sedangkan nilai panjang otomatis stacked dan centered supaya tetap rapi.
+- **Currency by Region** — default target currency mengikuti saved preference atau browser locale/region, dengan fallback `IDR`.
+- **Live Currency Rates** — currency card menampilkan exchange rate, provider, last updated date, dan link untuk melihat live rate di Google.
+- **Copy Result** — copy hasil conversion langsung dari card dengan satu klik.
+- **Context Menu Support** — conversion juga bisa dijalankan lewat menu klik kanan `Quick Convert`.
 
 ## Supported converters
 
@@ -67,14 +63,14 @@ Supported currencies:
 
 Exchange-rate provider: Frankfurter.
 
-Rate disimpan di `chrome.storage.local` dengan cache 1 jam.
+## How it works
 
-## Usage
+1. Select supported value di webpage.
+2. Quick Converter mendeteksi jenis value dan menampilkan small trigger icon dekat selection.
+3. Klik icon untuk membuka floating result card.
+4. Dari card, user bisa ganti target, swap conversion, copy hasil, atau melihat live currency rate.
 
-1. Buka `chrome://extensions`.
-2. Aktifkan Developer mode.
-3. Klik `Load unpacked` dan pilih folder project.
-4. Select text seperti:
+Contoh input:
 
 ```text
 10 miles
@@ -85,15 +81,7 @@ $100
 100 USD
 ```
 
-5. Klik small Quick Converter icon yang muncul dekat selection.
-6. Result card akan tampil dekat selection.
-7. Dari card, user bisa:
-   - ganti target unit / currency;
-   - swap source dan target;
-   - copy result;
-   - buka live currency rate di Google.
-
-Context menu `Quick Convert` juga tersedia saat text dipilih.
+Unsupported selection diabaikan tanpa mengganggu webpage.
 
 ## Adaptive layout
 
@@ -131,16 +119,7 @@ Contoh currency:
 $900.00 ⇄ IDR 15,926,400.00
 ```
 
-Untuk currency, reverse conversion menggunakan reciprocal dari rate aktif yang sama daripada mengambil reverse rate baru dari provider.
-
-Contoh:
-
-```text
-1 USD = 17,696 IDR
-reverse rate = 1 / 17,696
-```
-
-Tujuannya menjaga round-trip tetap konsisten:
+Untuk currency, reverse conversion menggunakan reciprocal dari rate aktif yang sama supaya round-trip tetap konsisten dan tidak drift karena precision reverse-rate.
 
 ```text
 $900
@@ -149,9 +128,11 @@ $900
 → IDR 15,926,400
 ```
 
-Last updated date dan provider tetap dipertahankan selama swap karena conversion masih menggunakan rate snapshot yang sama.
+Provider dan last updated date tetap dipertahankan selama swap karena conversion masih menggunakan rate snapshot yang sama.
 
-## Currency metadata
+## Currency rates
+
+Currency conversion menggunakan Frankfurter sebagai exchange-rate provider.
 
 Currency card menampilkan informasi seperti:
 
@@ -160,7 +141,50 @@ Currency card menampilkan informasi seperti:
 Frankfurter · Aug 29, 2026
 ```
 
-Nilai rate pada metadata hanya untuk display. Conversion logic menggunakan raw numeric rate supaya tidak terkena precision drift dari angka yang sudah diformat atau dibulatkan.
+Rate disimpan di `chrome.storage.local` dengan cache 1 jam untuk mengurangi request berulang.
+
+Raw numeric rate digunakan untuk calculation. Nilai rate yang sudah diformat hanya digunakan untuk display supaya conversion tidak terkena precision drift.
+
+## Installation
+
+1. Clone atau download repository.
+2. Buka `chrome://extensions`.
+3. Aktifkan Developer mode.
+4. Klik `Load unpacked`.
+5. Pilih folder project.
+
+Setelah perubahan code, reload extension dari `chrome://extensions`.
+
+## Architecture
+
+```text
+selected text
+  ↓
+content / selection detector
+  ↓
+background service worker
+  ↓
+selection-parser
+  ↓
+converter
+  ├─ unit-converter
+  └─ exchange-rate
+  ↓
+result UI
+  ├─ adaptive layout
+  ├─ target dropdown
+  ├─ swap control
+  └─ copy / live-rate actions
+```
+
+Main rules:
+
+- Parser hanya mengenali supported values dan aliases.
+- Conversion formulas tidak berada di DOM/content UI code.
+- Currency API request berjalan di background context.
+- Result UI hanya menangani interaction dan presentation.
+- Raw conversion values digunakan untuk calculation; formatted values hanya untuk display.
+- Popup dan options tetap terpisah dari selection-card flow.
 
 ## Project structure
 
@@ -199,37 +223,6 @@ tests/
   converter.test.js
 ```
 
-## Architecture
-
-```text
-selected text
-  ↓
-content / selection detector
-  ↓
-background service worker
-  ↓
-selection-parser
-  ↓
-converter
-  ├─ unit-converter
-  └─ exchange-rate
-  ↓
-result UI
-  ├─ adaptive layout
-  ├─ target dropdown
-  ├─ swap control
-  └─ copy / live-rate actions
-```
-
-Main rules:
-
-- Parser hanya mengenali supported values dan aliases.
-- Conversion formulas tidak berada di DOM/content UI code.
-- Currency API request berjalan di background context.
-- Result UI hanya menangani interaction dan presentation.
-- Raw conversion values digunakan untuk calculation; formatted values hanya untuk display.
-- Popup dan options tetap terpisah dari selection-card flow.
-
 ## Development
 
 Project menggunakan plain JavaScript dan Chrome Manifest V3.
@@ -260,13 +253,13 @@ Test suite mencakup:
 - weight conversion;
 - temperature conversion;
 - data conversion;
-- unit conversion metadata (`rate`, target list);
+- unit conversion metadata;
 - mocked currency exchange rate;
 - currency provider dan last updated date;
-- currency `rateOverride` tanpa reverse API request;
+- currency rate override tanpa reverse API request;
 - reciprocal-rate round-trip untuk mencegah precision drift saat swap berkali-kali.
 
-Contoh regression case yang dijaga test:
+Regression case utama:
 
 ```text
 $900
@@ -277,7 +270,7 @@ $900
 
 ## Current scope
 
-Quick Converter saat ini fokus ke conversion dari selected text + floating card.
+Quick Converter saat ini fokus ke conversion dari selected text + floating result card.
 
 Popup/options bukan fokus utama UX saat ini, tetapi tetap tersedia untuk preference dan future expansion.
 
