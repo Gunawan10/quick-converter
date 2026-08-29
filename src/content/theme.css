@@ -54,6 +54,7 @@
 #quick-converter-result .qc-header {
   min-height: 66px;
   padding: 13px 15px;
+  overflow: hidden;
   border-bottom: 1px solid var(--qc-border);
   border-radius: 20px 20px 0 0;
   background: linear-gradient(135deg, var(--qc-accent-softer) 0%, #ffffff 78%);
@@ -61,11 +62,11 @@
 
 #quick-converter-result .qc-header::before {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  top: 10px;
+  bottom: 10px;
+  left: 8px;
   width: 4px;
-  border-radius: 20px 0 0 0;
+  border-radius: 999px;
   background: var(--qc-accent);
   content: '';
 }
