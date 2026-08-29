@@ -46,8 +46,7 @@ chrome.runtime.onMessage.addListener(
         .catch((error) => {
           sendResponse({
             success: false,
-            message:
-              error.message || 'Conversion unavailable'
+            message: error.message || 'Conversion unavailable'
           });
         });
 
@@ -60,8 +59,20 @@ chrome.runtime.onMessage.addListener(
         .catch((error) => {
           sendResponse({
             success: false,
-            message:
-              error.message || 'Conversion unavailable'
+            message: error.message || 'Conversion unavailable'
+          });
+        });
+
+      return true;
+    }
+
+    if (message.type === 'SWAP_CONVERSION') {
+      swapConversion(message)
+        .then(sendResponse)
+        .catch((error) => {
+          sendResponse({
+            success: false,
+            message: error.message || 'Conversion unavailable'
           });
         });
 
@@ -82,9 +93,7 @@ chrome.contextMenus.onClicked.addListener(
       return;
     }
 
-    const result = await handleConversion(
-      info.selectionText
-    );
+    const result = await handleConversion(info.selectionText);
 
     if (!result.ignored) {
       await sendResultToTab(tab.id, result);
@@ -96,10 +105,7 @@ function queueContextMenuOperation(operation) {
   contextMenuOperation = contextMenuOperation
     .then(operation)
     .catch((error) => {
-      console.error(
-        '[Quick Converter] Context menu error:',
-        error
-      );
+      console.error('[Quick Converter] Context menu error:', error);
     });
 
   return contextMenuOperation;
@@ -121,8 +127,7 @@ async function getTargetCurrency(locale) {
     return targetCurrency;
   }
 
-  const browserLocale =
-    locale || chrome.i18n.getUILanguage();
+  const browserLocale = locale || chrome.i18n.getUILanguage();
 
   return getCurrencyFromLocale(browserLocale) || DEFAULT_CURRENCY;
 }
@@ -178,9 +183,7 @@ async function rebuildContextMenu() {
 }
 
 function updateContextMenuForSelection(selectionText) {
-  const parsed = parseSelection(
-    selectionText?.trim() || ''
-  );
+  const parsed = parseSelection(selectionText?.trim() || '');
 
   const title = parsed
     ? `Convert ${getConverterLabel(parsed.type)}`
@@ -200,9 +203,7 @@ function getConverterLabel(type) {
 async function initializeLocale(locale) {
   const {
     currencyPreferenceSet
-  } = await chrome.storage.local.get(
-    'currencyPreferenceSet'
-  );
+  } = await chrome.storage.local.get('currencyPreferenceSet');
 
   if (currencyPreferenceSet || !locale) {
     return;
@@ -242,10 +243,7 @@ async function handleConversion(text, locale) {
       targetCurrency: await getTargetCurrency(locale)
     });
   } catch (error) {
-    console.error(
-      '[Quick Converter] Conversion error:',
-      error
-    );
+    console.error('[Quick Converter] Conversion error:', error);
 
     return {
       success: false,
@@ -262,8 +260,52 @@ async function changeTarget(message) {
     targetUnit
   } = message;
 
+  validateConversionRequest(
+    converterType,
+    value,
+    fromUnit,
+    targetUnit
+  );
+
+  return convertWithTarget(
+    converterType,
+    value,
+    fromUnit,
+    targetUnit
+  );
+}
+
+async function swapConversion(message) {
+  const {
+    converterType,
+    value,
+    fromUnit,
+    targetUnit
+  } = message;
+
+  validateConversionRequest(
+    converterType,
+    value,
+    fromUnit,
+    targetUnit
+  );
+
+  return convertWithTarget(
+    converterType,
+    value,
+    fromUnit,
+    targetUnit
+  );
+}
+
+function validateConversionRequest(
+  converterType,
+  value,
+  fromUnit,
+  targetUnit
+) {
   if (!Number.isFinite(value) || !fromUnit || !targetUnit) {
-    throw new Error('Invalid conversion target');
+    throw new Error('Invalid conversion request');
   }
 
   if (converterType === 'currency') {
@@ -271,6 +313,24 @@ async function changeTarget(message) {
       throw new Error('Invalid currency conversion');
     }
 
+    return;
+  }
+
+  if (
+    !UNIT_TYPES[converterType]?.units?.[fromUnit] ||
+    !UNIT_TYPES[converterType]?.units?.[targetUnit]
+  ) {
+    throw new Error('Invalid unit conversion');
+  }
+}
+
+function convertWithTarget(
+  converterType,
+  value,
+  fromUnit,
+  targetUnit
+) {
+  if (converterType === 'currency') {
     return convert(
       {
         type: 'currency',
@@ -279,13 +339,6 @@ async function changeTarget(message) {
       },
       { targetCurrency: targetUnit }
     );
-  }
-
-  if (
-    !UNIT_TYPES[converterType]?.units?.[fromUnit] ||
-    !UNIT_TYPES[converterType]?.units?.[targetUnit]
-  ) {
-    throw new Error('Invalid unit conversion');
   }
 
   return convert(
