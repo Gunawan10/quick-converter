@@ -17,6 +17,7 @@ Data conversion uses decimal SI units (`1 KB = 1000 Byte`, `1 MB = 1000 KB`) and
 1. Load folder as unpacked extension from `chrome://extensions` (Developer mode).
 2. Select text such as `10 miles`, `5 kg`, `72°F`, `5 GB`, or `$100`.
 3. Quick Converter shows result near selection. Context-menu `Quick Convert` is also available.
+4. Use target dropdown in result card to switch currency or unit without opening popup.
 
 Unsupported selections do nothing. Currency/API failures show a small `Conversion unavailable` state.
 
