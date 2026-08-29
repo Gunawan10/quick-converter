@@ -1,7 +1,12 @@
 const API_BASE_URL = 'https://api.frankfurter.dev/v2';
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
-export async function getRate(from, to) {
+export async function getRate(
+  from,
+  to,
+  storage = chrome.storage.local,
+  fetchFn = fetch
+) {
   if (from === to) {
     return {
       rate: 1,
@@ -10,7 +15,7 @@ export async function getRate(from, to) {
   }
 
   const cacheKey = `rate:${from}:${to}`;
-  const cached = await chrome.storage.local.get(cacheKey);
+  const cached = await storage.get(cacheKey);
   const cachedRate = cached[cacheKey];
 
   if (
@@ -20,7 +25,7 @@ export async function getRate(from, to) {
     return cachedRate.data;
   }
 
-  const response = await fetch(
+  const response = await fetchFn(
     `${API_BASE_URL}/rate/${from}/${to}`
   );
 
@@ -36,7 +41,7 @@ export async function getRate(from, to) {
     date: data.date
   };
 
-  await chrome.storage.local.set({
+  await storage.set({
     [cacheKey]: {
       fetchedAt: Date.now(),
       data: result

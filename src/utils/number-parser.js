@@ -1,6 +1,6 @@
 export function parseNumber(value) {
   if (typeof value !== 'string') {
-    return Number.NaN;
+    return null;
   }
 
   let text = value
@@ -8,28 +8,35 @@ export function parseNumber(value) {
     .replace(/\s/g, '');
 
   if (!text || !/^[+-]?[\d.,]+$/.test(text)) {
-    return Number.NaN;
+    return null;
   }
 
-  const sign = text.startsWith('-') ? '-' : '';
-  text = text.replace(/^[+-]/, '');
+  const signless = text.replace(/^[+-]/, '');
+
+  if (!/\d/.test(signless)) {
+    return null;
+  }
 
   const lastComma = text.lastIndexOf(',');
   const lastDot = text.lastIndexOf('.');
 
   if (lastComma !== -1 && lastDot !== -1) {
-    text = normalizeMixedSeparators(text, lastComma, lastDot);
+    text = normalizeMixedSeparators(
+      text,
+      lastComma,
+      lastDot
+    );
   } else if (lastComma !== -1) {
-    text = normalizeSingleSeparator(text, ',');
+    text = normalizeComma(text, lastComma);
   } else if (lastDot !== -1) {
-    text = normalizeSingleSeparator(text, '.');
+    text = normalizeMultipleDots(text);
   }
 
-  const parsed = Number(`${sign}${text}`);
+  const number = Number(text);
 
-  return Number.isFinite(parsed)
-    ? parsed
-    : Number.NaN;
+  return Number.isFinite(number)
+    ? number
+    : null;
 }
 
 function normalizeMixedSeparators(text, lastComma, lastDot) {
@@ -42,18 +49,20 @@ function normalizeMixedSeparators(text, lastComma, lastDot) {
   return text.replace(/,/g, '');
 }
 
-function normalizeSingleSeparator(text, separator) {
-  const index = text.lastIndexOf(separator);
-  const decimals = text.length - index - 1;
-  const separatorPattern = separator === '.' ? /\./g : /,/g;
+function normalizeComma(text, lastComma) {
+  const decimals = text.length - lastComma - 1;
 
-  if (decimals === 3 && text.indexOf(separator) === index) {
-    return text.replace(separatorPattern, '');
-  }
-
-  if (separator === ',') {
+  if (decimals > 0 && decimals <= 2) {
     return text.replace(',', '.');
   }
 
-  return text;
+  return text.replace(/,/g, '');
+}
+
+function normalizeMultipleDots(text) {
+  const parts = text.split('.');
+
+  return parts.length > 2
+    ? text.replace(/\./g, '')
+    : text;
 }

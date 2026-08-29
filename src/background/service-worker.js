@@ -8,54 +8,36 @@ import { convert } from '../services/converter.js';
 
 const MENU_ID = 'quick-converter-convert';
 
-chrome.runtime.onInstalled.addListener(async () => {
-  await initializeSettings();
-  await rebuildContextMenu();
-});
+let contextMenuOperation = Promise.resolve();
 
-chrome.runtime.onStartup.addListener(rebuildContextMenu);
-
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (
-    areaName === 'local' &&
-    changes.targetCurrency
-  ) {
-    rebuildContextMenu();
-  }
-});
-
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (
-    info.menuItemId !== MENU_ID ||
-    !tab?.id ||
-    !info.selectionText
-  ) {
-    return;
-  }
-
-  await handleSelectionConversion({
-    text: info.selectionText,
-    tabId: tab.id
+chrome.runtime.onInstalled.addListener((details) => {
+  queueContextMenuOperation(async () => {
+    await initializeSettings(details.reason);
+    await rebuildContextMenu();
   });
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  queueContextMenuOperation(rebuildContextMenu);
 });
 
 chrome.runtime.onMessage.addListener(
   (message, sender, sendResponse) => {
     if (message.type === 'INITIALIZE_LOCALE') {
       initializeLocale(message.locale)
-        .then(() => sendResponse({ success: true }))
-        .catch(() => sendResponse({ success: false }));
+        .then(() => sendResponse({ ok: true }));
 
       return true;
     }
 
     if (message.type === 'CONVERT_SELECTION') {
-      convertSelection(message.text)
+      handleConversion(message.text)
         .then(sendResponse)
-        .catch(() => {
+        .catch((error) => {
           sendResponse({
             success: false,
-            message: 'Conversion unavailable'
+            message:
+              error.message || 'Conversion unavailable'
           });
         });
 
@@ -63,9 +45,15 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === 'CHANGE_TARGET_CURRENCY') {
-      handleCurrencyTargetChange(message, sender)
-        .then(() => sendResponse({ success: true }))
-        .catch(() => sendResponse({ success: false }));
+      changeTargetCurrency(message, sender)
+        .then(sendResponse)
+        .catch((error) => {
+          sendResponse({
+            success: false,
+            message:
+              error.message || 'Conversion unavailable'
+          });
+        });
 
       return true;
     }
@@ -74,24 +62,47 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-async function initializeSettings() {
-  const { targetCurrency } = await chrome.storage.local.get(
-    'targetCurrency'
-  );
+chrome.contextMenus.onClicked.addListener(
+  async (info, tab) => {
+    if (
+      info.menuItemId !== MENU_ID ||
+      !info.selectionText?.trim() ||
+      !tab?.id
+    ) {
+      return;
+    }
 
-  if (!targetCurrency) {
-    await chrome.storage.local.set({
-      targetCurrency: DEFAULT_CURRENCY,
-      currencyPreferenceSet: false
-    });
+    const result = await handleConversion(
+      info.selectionText
+    );
+
+    if (!result.ignored) {
+      await sendResultToTab(tab.id, result);
+    }
   }
+);
+
+function queueContextMenuOperation(operation) {
+  contextMenuOperation = contextMenuOperation
+    .then(operation)
+    .catch((error) => {
+      console.error(
+        '[Quick Converter] Context menu error:',
+        error
+      );
+    });
+
+  return contextMenuOperation;
 }
 
-async function initializeLocale(locale) {
-  if (!locale) {
-    return;
-  }
+async function getTargetCurrency() {
+  const { targetCurrency = DEFAULT_CURRENCY } =
+    await chrome.storage.local.get('targetCurrency');
 
+  return targetCurrency;
+}
+
+async function initializeSettings(reason) {
   const {
     targetCurrency,
     currencyPreferenceSet
@@ -100,27 +111,24 @@ async function initializeLocale(locale) {
     'currencyPreferenceSet'
   ]);
 
-  if (currencyPreferenceSet) {
+  if (reason === 'install' && !targetCurrency) {
+    await chrome.storage.local.set({
+      targetCurrency: DEFAULT_CURRENCY,
+      currencyPreferenceSet: false
+    });
+
     return;
   }
 
-  const detectedCurrency = getCurrencyFromLocale(locale);
-
-  if (targetCurrency !== detectedCurrency) {
+  if (
+    reason === 'update' &&
+    targetCurrency &&
+    typeof currencyPreferenceSet === 'undefined'
+  ) {
     await chrome.storage.local.set({
-      targetCurrency: detectedCurrency
+      currencyPreferenceSet: true
     });
   }
-}
-
-async function rebuildContextMenu() {
-  await removeContextMenus();
-
-  chrome.contextMenus.create({
-    id: MENU_ID,
-    title: 'Quick Convert',
-    contexts: ['selection']
-  });
 }
 
 function removeContextMenus() {
@@ -129,37 +137,69 @@ function removeContextMenus() {
   });
 }
 
-async function handleSelectionConversion({ text, tabId }) {
-  const result = await convertSelection(text);
+async function rebuildContextMenu() {
+  await removeContextMenus();
 
-  if (result.ignored) {
-    return;
-  }
-
-  await sendResultToTab(tabId, result);
+  await new Promise((resolve) => {
+    chrome.contextMenus.create(
+      {
+        id: MENU_ID,
+        title: 'Quick Convert',
+        contexts: ['selection']
+      },
+      () => resolve()
+    );
+  });
 }
 
-async function convertSelection(text) {
+async function initializeLocale(locale) {
+  const {
+    targetCurrency,
+    currencyPreferenceSet
+  } = await chrome.storage.local.get([
+    'targetCurrency',
+    'currencyPreferenceSet'
+  ]);
+
+  if (!currencyPreferenceSet && locale) {
+    const detected = getCurrencyFromLocale(locale);
+
+    if (targetCurrency !== detected) {
+      await chrome.storage.local.set({
+        targetCurrency: detected
+      });
+    }
+  }
+}
+
+async function handleConversion(text) {
   const parsed = parseSelection(text);
 
   if (!parsed) {
-    return { ignored: true };
-  }
-
-  const targetCurrency = await getTargetCurrency();
-
-  try {
-    return await convert(parsed, { targetCurrency });
-  } catch {
     return {
       success: false,
-      type: parsed.type,
+      ignored: true
+    };
+  }
+
+  try {
+    return await convert(parsed, {
+      targetCurrency: await getTargetCurrency()
+    });
+  } catch (error) {
+    console.error(
+      '[Quick Converter] Conversion error:',
+      error
+    );
+
+    return {
+      success: false,
       message: 'Conversion unavailable'
     };
   }
 }
 
-async function handleCurrencyTargetChange(message, sender) {
+async function changeTargetCurrency(message, sender) {
   const {
     value,
     fromUnit,
@@ -167,11 +207,11 @@ async function handleCurrencyTargetChange(message, sender) {
   } = message;
 
   if (
-    typeof value !== 'number' ||
+    !Number.isFinite(value) ||
     !CURRENCIES[fromUnit] ||
     !CURRENCIES[targetCurrency]
   ) {
-    return;
+    throw new Error('Invalid currency conversion');
   }
 
   await chrome.storage.local.set({
@@ -191,13 +231,8 @@ async function handleCurrencyTargetChange(message, sender) {
   if (sender.tab?.id) {
     await sendResultToTab(sender.tab.id, result);
   }
-}
 
-async function getTargetCurrency() {
-  const { targetCurrency = DEFAULT_CURRENCY } =
-    await chrome.storage.local.get('targetCurrency');
-
-  return targetCurrency;
+  return result;
 }
 
 function sendResultToTab(tabId, data) {
