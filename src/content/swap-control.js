@@ -51,6 +51,8 @@
     const converterType = getConverterType(card);
     const swappedValue = parseDisplayedNumber(result);
     const originalRate = getOriginalRate(card);
+    const originalDate = card.dataset.conversionDate || null;
+    const originalProvider = card.dataset.provider || null;
 
     if (
       !source ||
@@ -74,7 +76,9 @@
         targetUnit: originalSourceUnit,
         originalRate: Number.isFinite(originalRate)
           ? originalRate
-          : null
+          : null,
+        originalDate,
+        originalProvider
       });
 
       if (response?.success) {
