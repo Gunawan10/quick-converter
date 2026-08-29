@@ -3,6 +3,7 @@ import {
   DEFAULT_CURRENCY
 } from '../constants/currencies.js';
 import {
+  UNIT_TYPES,
   getDefaultTarget,
   getUnitLabel
 } from '../constants/units.js';
@@ -44,7 +45,8 @@ function convertMeasurement(parsed, options) {
     toUnit: targetUnit,
     source: `${formatNumber(parsed.value)} ${getUnitLabel(parsed.type, parsed.unit)}`,
     result: `${formatNumber(convertedValue)} ${getUnitLabel(parsed.type, targetUnit)}`,
-    convertedValue
+    convertedValue,
+    targets: getUnitTargets(parsed.type)
   };
 }
 
@@ -77,6 +79,18 @@ async function convertCurrency(parsed, options) {
     rate,
     date,
     provider: 'Frankfurter',
-    currencies: CURRENCIES
+    targets: Object.entries(CURRENCIES).map(([code, currency]) => ({
+      value: code,
+      label: `${code} — ${currency.name}`
+    }))
   };
+}
+
+function getUnitTargets(type) {
+  const units = UNIT_TYPES[type]?.units || {};
+
+  return Object.entries(units).map(([code, unit]) => ({
+    value: code,
+    label: unit.label
+  }));
 }

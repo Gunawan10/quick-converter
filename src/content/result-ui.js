@@ -1,4 +1,8 @@
 (() => {
+  const ICON_URL = chrome.runtime.getURL(
+    'assets/icons/icon16.png'
+  );
+
   const state = {
     resultElement: null,
     selectionRect: null,
@@ -41,6 +45,19 @@
     state.currentConversion = null;
   }
 
+  function buildBrandMarkup() {
+    return `
+      <div class="qc-brand">
+        <img
+          class="qc-logo"
+          src="${ICON_URL}"
+          alt="Quick Converter"
+        />
+        <strong>Quick Converter</strong>
+      </div>
+    `;
+  }
+
   function buildErrorMarkup(data) {
     const message = escapeHtml(
       data.message || 'Conversion unavailable'
@@ -48,7 +65,7 @@
 
     return `
       <div class="qc-header">
-        <strong>Quick Converter</strong>
+        ${buildBrandMarkup()}
       </div>
       <div class="qc-error">${message}</div>
     `;
@@ -56,13 +73,13 @@
 
   function buildSuccessMarkup(data) {
     const category = data.type.toUpperCase();
-    const headerControl = buildHeaderControl(data, category);
+    const targetSelect = buildTargetSelect(data);
     const metadata = buildMetadata(data);
 
     return `
       <div class="qc-header">
-        <strong>Quick Converter</strong>
-        ${headerControl}
+        ${buildBrandMarkup()}
+        ${targetSelect}
       </div>
 
       <div class="qc-conversion">
@@ -88,25 +105,27 @@
     `;
   }
 
-  function buildHeaderControl(data, category) {
-    if (data.type !== 'currency') {
-      return `<span class="qc-badge">${escapeHtml(category)}</span>`;
-    }
-
-    const options = Object.entries(data.currencies || {})
-      .map(([code, currency]) => {
-        const selected = code === data.toUnit ? 'selected' : '';
+  function buildTargetSelect(data) {
+    const options = (data.targets || [])
+      .map((target) => {
+        const selected = target.value === data.toUnit
+          ? 'selected'
+          : '';
 
         return `
-          <option value="${escapeHtml(code)}" ${selected}>
-            ${escapeHtml(code)} — ${escapeHtml(currency.name)}
+          <option value="${escapeHtml(target.value)}" ${selected}>
+            ${escapeHtml(target.label)}
           </option>
         `;
       })
       .join('');
 
     return `
-      <select class="qc-select" aria-label="Target currency">
+      <select
+        class="qc-select"
+        aria-label="Target ${escapeHtml(data.type)}"
+        title="Change target"
+      >
         ${options}
       </select>
     `;
@@ -132,7 +151,7 @@
 
   function bindResultEvents() {
     bindCopyButton();
-    bindCurrencySelect();
+    bindTargetSelect();
   }
 
   function bindCopyButton() {
@@ -161,25 +180,38 @@
     });
   }
 
-  function bindCurrencySelect() {
+  function bindTargetSelect() {
     const select = state.resultElement?.querySelector('.qc-select');
+
+    select?.addEventListener('mousedown', (event) => {
+      event.stopPropagation();
+    });
+
+    select?.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
 
     select?.addEventListener('change', async (event) => {
       event.stopPropagation();
 
-      if (state.currentConversion?.type !== 'currency') {
+      if (!state.currentConversion) {
         return;
       }
 
       select.disabled = true;
 
       try {
-        await chrome.runtime.sendMessage({
-          type: 'CHANGE_TARGET_CURRENCY',
+        const result = await chrome.runtime.sendMessage({
+          type: 'CHANGE_TARGET',
+          converterType: state.currentConversion.type,
           value: state.currentConversion.value,
           fromUnit: state.currentConversion.fromUnit,
-          targetCurrency: event.target.value
+          targetUnit: event.target.value
         });
+
+        if (result?.success) {
+          showResult(result);
+        }
       } finally {
         if (select.isConnected) {
           select.disabled = false;

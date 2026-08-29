@@ -3,6 +3,7 @@ import {
   DEFAULT_CURRENCY,
   getCurrencyFromLocale
 } from '../constants/currencies.js';
+import { UNIT_TYPES } from '../constants/units.js';
 import { parseSelection } from '../utils/selection-parser.js';
 import { convert } from '../services/converter.js';
 
@@ -44,8 +45,8 @@ chrome.runtime.onMessage.addListener(
       return true;
     }
 
-    if (message.type === 'CHANGE_TARGET_CURRENCY') {
-      changeTargetCurrency(message, sender)
+    if (message.type === 'CHANGE_TARGET') {
+      changeTarget(message)
         .then(sendResponse)
         .catch((error) => {
           sendResponse({
@@ -199,40 +200,53 @@ async function handleConversion(text) {
   }
 }
 
-async function changeTargetCurrency(message, sender) {
+async function changeTarget(message) {
   const {
+    converterType,
     value,
     fromUnit,
-    targetCurrency
+    targetUnit
   } = message;
 
-  if (
-    !Number.isFinite(value) ||
-    !CURRENCIES[fromUnit] ||
-    !CURRENCIES[targetCurrency]
-  ) {
-    throw new Error('Invalid currency conversion');
+  if (!Number.isFinite(value) || !fromUnit || !targetUnit) {
+    throw new Error('Invalid conversion target');
   }
 
-  await chrome.storage.local.set({
-    targetCurrency,
-    currencyPreferenceSet: true
-  });
+  if (converterType === 'currency') {
+    if (!CURRENCIES[fromUnit] || !CURRENCIES[targetUnit]) {
+      throw new Error('Invalid currency conversion');
+    }
 
-  const result = await convert(
+    await chrome.storage.local.set({
+      targetCurrency: targetUnit,
+      currencyPreferenceSet: true
+    });
+
+    return convert(
+      {
+        type: 'currency',
+        value,
+        unit: fromUnit
+      },
+      { targetCurrency: targetUnit }
+    );
+  }
+
+  if (
+    !UNIT_TYPES[converterType]?.units?.[fromUnit] ||
+    !UNIT_TYPES[converterType]?.units?.[targetUnit]
+  ) {
+    throw new Error('Invalid unit conversion');
+  }
+
+  return convert(
     {
-      type: 'currency',
+      type: converterType,
       value,
       unit: fromUnit
     },
-    { targetCurrency }
+    { targetUnit }
   );
-
-  if (sender.tab?.id) {
-    await sendResultToTab(sender.tab.id, result);
-  }
-
-  return result;
 }
 
 function sendResultToTab(tabId, data) {
