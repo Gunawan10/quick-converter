@@ -66,12 +66,23 @@ async function convertCurrency(parsed, options) {
     throw new Error('Unsupported target currency');
   }
 
-  const { rate, date } = await getRate(
-    parsed.unit,
-    targetCurrency,
-    options.storage,
-    options.fetchFn
-  );
+  let rate;
+  let date;
+
+  if (Number.isFinite(options.rateOverride)) {
+    rate = options.rateOverride;
+    date = options.dateOverride || null;
+  } else {
+    const response = await getRate(
+      parsed.unit,
+      targetCurrency,
+      options.storage,
+      options.fetchFn
+    );
+
+    rate = response.rate;
+    date = response.date;
+  }
 
   const convertedValue = parsed.value * rate;
 
