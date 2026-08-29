@@ -11,6 +11,24 @@ function assertClose(actual, expected, tolerance = 1e-5) {
   );
 }
 
+function createMockStorage() {
+  return {
+    async get() {
+      return {};
+    },
+    async set() {}
+  };
+}
+
+function createMockRateFetch(rate, date = '2026-08-29') {
+  return async () => ({
+    ok: true,
+    async json() {
+      return { rate, date };
+    }
+  });
+}
+
 test('10 km to mi', () => {
   assertClose(
     convertUnit('length', 10, 'km', 'mi'),
@@ -67,24 +85,27 @@ test('8 bit to Byte', () => {
   );
 });
 
-test('currency uses mocked exchange rate', async () => {
-  const storage = {
-    async get() {
-      return {};
+test('measurement conversion returns rate and targets', async () => {
+  const result = await convert(
+    {
+      type: 'length',
+      value: 10,
+      unit: 'mi'
     },
-    async set() {}
-  };
-
-  const fetchFn = async () => ({
-    ok: true,
-    async json() {
-      return {
-        rate: 16000,
-        date: '2026-08-29'
-      };
+    {
+      targetUnit: 'km'
     }
-  });
+  );
 
+  assert.equal(result.success, true);
+  assert.equal(result.fromUnit, 'mi');
+  assert.equal(result.toUnit, 'km');
+  assertClose(result.convertedValue, 16.09344);
+  assertClose(result.rate, 1.609344);
+  assert.ok(result.targets.some((target) => target.value === 'km'));
+});
+
+test('currency uses mocked exchange rate and preserves metadata', async () => {
   const result = await convert(
     {
       type: 'currency',
@@ -93,11 +114,93 @@ test('currency uses mocked exchange rate', async () => {
     },
     {
       targetCurrency: 'IDR',
-      storage,
-      fetchFn
+      storage: createMockStorage(),
+      fetchFn: createMockRateFetch(16000)
     }
   );
 
+  assert.equal(result.success, true);
   assert.equal(result.convertedValue, 32000);
+  assert.equal(result.rate, 16000);
+  assert.equal(result.date, '2026-08-29');
   assert.equal(result.provider, 'Frankfurter');
+  assert.ok(result.targets.some((target) => target.value === 'USD'));
+  assert.ok(result.targets.some((target) => target.value === 'IDR'));
+});
+
+test('currency rateOverride avoids fetching a reverse rate', async () => {
+  let fetchCalls = 0;
+
+  const result = await convert(
+    {
+      type: 'currency',
+      value: 15926400,
+      unit: 'IDR'
+    },
+    {
+      targetCurrency: 'USD',
+      rateOverride: 1 / 17696,
+      dateOverride: '2026-08-29',
+      fetchFn: async () => {
+        fetchCalls += 1;
+        throw new Error('fetch should not be called');
+      }
+    }
+  );
+
+  assert.equal(fetchCalls, 0);
+  assertClose(result.convertedValue, 900, 1e-9);
+  assertClose(result.rate, 1 / 17696, 1e-12);
+  assert.equal(result.date, '2026-08-29');
+  assert.equal(result.provider, 'Frankfurter');
+});
+
+test('currency reciprocal rate remains stable across repeated swaps', async () => {
+  const originalRate = 17696;
+
+  const forward = await convert(
+    {
+      type: 'currency',
+      value: 900,
+      unit: 'USD'
+    },
+    {
+      targetCurrency: 'IDR',
+      rateOverride: originalRate,
+      dateOverride: '2026-08-29'
+    }
+  );
+
+  const reverse = await convert(
+    {
+      type: 'currency',
+      value: forward.convertedValue,
+      unit: 'IDR'
+    },
+    {
+      targetCurrency: 'USD',
+      rateOverride: 1 / forward.rate,
+      dateOverride: forward.date
+    }
+  );
+
+  const forwardAgain = await convert(
+    {
+      type: 'currency',
+      value: reverse.convertedValue,
+      unit: 'USD'
+    },
+    {
+      targetCurrency: 'IDR',
+      rateOverride: 1 / reverse.rate,
+      dateOverride: reverse.date
+    }
+  );
+
+  assertClose(forward.convertedValue, 15926400, 1e-9);
+  assertClose(reverse.convertedValue, 900, 1e-9);
+  assertClose(forwardAgain.convertedValue, 15926400, 1e-6);
+  assertClose(forwardAgain.rate, originalRate, 1e-9);
+  assert.equal(reverse.date, '2026-08-29');
+  assert.equal(forwardAgain.date, '2026-08-29');
 });
