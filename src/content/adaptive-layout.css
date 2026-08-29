@@ -1,0 +1,38 @@
+#quick-converter-result .qc-main.qc-main--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 16px 16px;
+  text-align: center;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-main-value {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  font-size: 21px;
+  text-align: center;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-source,
+#quick-converter-result .qc-main.qc-main--stacked .qc-result {
+  max-width: 100%;
+  text-align: center;
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-arrow {
+  width: 100%;
+  height: 16px;
+  font-size: 15px;
+  line-height: 16px;
+  text-align: center;
+}
+
+@media (max-width: 380px) {
+  #quick-converter-result .qc-main.qc-main--stacked .qc-main-value {
+    font-size: 19px;
+  }
+}
