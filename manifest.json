@@ -29,10 +29,12 @@
     {
       "matches": ["<all_urls>"],
       "css": [
-        "src/content/content.css"
+        "src/content/content.css",
+        "src/content/adaptive-layout.css"
       ],
       "js": [
         "src/content/result-ui.js",
+        "src/content/adaptive-layout.js",
         "src/content/runtime.js",
         "src/content/selection.js",
         "src/content/content.js"
