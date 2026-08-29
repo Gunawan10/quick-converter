@@ -22,10 +22,6 @@ chrome.runtime.onStartup.addListener(() => {
   queueContextMenuOperation(rebuildContextMenu);
 });
 
-chrome.contextMenus.onShown.addListener((info) => {
-  updateContextMenuForSelection(info.selectionText);
-});
-
 chrome.runtime.onMessage.addListener(
   (message, sender, sendResponse) => {
     if (message.type === 'INITIALIZE_LOCALE') {
@@ -36,7 +32,11 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === 'DETECT_SELECTION') {
-      sendResponse(detectSelection(message.text));
+      const detection = detectSelection(message.text);
+
+      updateContextMenuForSelection(message.text);
+      sendResponse(detection);
+
       return false;
     }
 
@@ -186,11 +186,7 @@ function updateContextMenuForSelection(selectionText) {
     ? `Convert ${getConverterLabel(parsed.type)}`
     : 'Quick Convert';
 
-  chrome.contextMenus.update(
-    MENU_ID,
-    { title },
-    () => chrome.contextMenus.refresh()
-  );
+  chrome.contextMenus.update(MENU_ID, { title });
 }
 
 function getConverterLabel(type) {
