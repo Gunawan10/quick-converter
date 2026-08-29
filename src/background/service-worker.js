@@ -22,6 +22,10 @@ chrome.runtime.onStartup.addListener(() => {
   queueContextMenuOperation(rebuildContextMenu);
 });
 
+chrome.contextMenus.onShown.addListener((info) => {
+  updateContextMenuForSelection(info.selectionText);
+});
+
 chrome.runtime.onMessage.addListener(
   (message, sender, sendResponse) => {
     if (message.type === 'INITIALIZE_LOCALE') {
@@ -31,8 +35,13 @@ chrome.runtime.onMessage.addListener(
       return true;
     }
 
+    if (message.type === 'DETECT_SELECTION') {
+      sendResponse(detectSelection(message.text));
+      return false;
+    }
+
     if (message.type === 'CONVERT_SELECTION') {
-      handleConversion(message.text)
+      handleConversion(message.text, message.locale)
         .then(sendResponse)
         .catch((error) => {
           sendResponse({
@@ -96,11 +105,26 @@ function queueContextMenuOperation(operation) {
   return contextMenuOperation;
 }
 
-async function getTargetCurrency() {
-  const { targetCurrency = DEFAULT_CURRENCY } =
-    await chrome.storage.local.get('targetCurrency');
+async function getTargetCurrency(locale) {
+  const {
+    targetCurrency,
+    currencyPreferenceSet
+  } = await chrome.storage.local.get([
+    'targetCurrency',
+    'currencyPreferenceSet'
+  ]);
 
-  return targetCurrency;
+  if (
+    currencyPreferenceSet &&
+    CURRENCIES[targetCurrency]
+  ) {
+    return targetCurrency;
+  }
+
+  const browserLocale =
+    locale || chrome.i18n.getUILanguage();
+
+  return getCurrencyFromLocale(browserLocale) || DEFAULT_CURRENCY;
 }
 
 async function initializeSettings(reason) {
@@ -127,7 +151,7 @@ async function initializeSettings(reason) {
     typeof currencyPreferenceSet === 'undefined'
   ) {
     await chrome.storage.local.set({
-      currencyPreferenceSet: true
+      currencyPreferenceSet: false
     });
   }
 }
@@ -153,27 +177,61 @@ async function rebuildContextMenu() {
   });
 }
 
-async function initializeLocale(locale) {
-  const {
-    targetCurrency,
-    currencyPreferenceSet
-  } = await chrome.storage.local.get([
-    'targetCurrency',
-    'currencyPreferenceSet'
-  ]);
+function updateContextMenuForSelection(selectionText) {
+  const parsed = parseSelection(
+    selectionText?.trim() || ''
+  );
 
-  if (!currencyPreferenceSet && locale) {
-    const detected = getCurrencyFromLocale(locale);
+  const title = parsed
+    ? `Convert ${getConverterLabel(parsed.type)}`
+    : 'Quick Convert';
 
-    if (targetCurrency !== detected) {
-      await chrome.storage.local.set({
-        targetCurrency: detected
-      });
-    }
-  }
+  chrome.contextMenus.update(
+    MENU_ID,
+    { title },
+    () => chrome.contextMenus.refresh()
+  );
 }
 
-async function handleConversion(text) {
+function getConverterLabel(type) {
+  if (type === 'currency') {
+    return 'Currency';
+  }
+
+  return UNIT_TYPES[type]?.label || 'Value';
+}
+
+async function initializeLocale(locale) {
+  const {
+    currencyPreferenceSet
+  } = await chrome.storage.local.get(
+    'currencyPreferenceSet'
+  );
+
+  if (currencyPreferenceSet || !locale) {
+    return;
+  }
+
+  await chrome.storage.local.set({
+    targetCurrency: getCurrencyFromLocale(locale)
+  });
+}
+
+function detectSelection(text) {
+  const parsed = parseSelection(text);
+
+  if (!parsed) {
+    return { recognized: false };
+  }
+
+  return {
+    recognized: true,
+    type: parsed.type,
+    label: getConverterLabel(parsed.type)
+  };
+}
+
+async function handleConversion(text, locale) {
   const parsed = parseSelection(text);
 
   if (!parsed) {
@@ -185,7 +243,7 @@ async function handleConversion(text) {
 
   try {
     return await convert(parsed, {
-      targetCurrency: await getTargetCurrency()
+      targetCurrency: await getTargetCurrency(locale)
     });
   } catch (error) {
     console.error(
@@ -216,11 +274,6 @@ async function changeTarget(message) {
     if (!CURRENCIES[fromUnit] || !CURRENCIES[targetUnit]) {
       throw new Error('Invalid currency conversion');
     }
-
-    await chrome.storage.local.set({
-      targetCurrency: targetUnit,
-      currencyPreferenceSet: true
-    });
 
     return convert(
       {

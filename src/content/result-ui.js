@@ -5,8 +5,10 @@
 
   const state = {
     resultElement: null,
+    triggerElement: null,
     selectionRect: null,
-    currentConversion: null
+    currentConversion: null,
+    pendingSelectionText: null
   };
 
   function setSelectionRect(rect) {
@@ -20,7 +22,75 @@
     };
   }
 
+  function showTrigger(text, type) {
+    hideTrigger();
+    hideResult();
+
+    state.pendingSelectionText = text;
+    state.triggerElement = document.createElement('button');
+    state.triggerElement.id = 'quick-converter-trigger';
+    state.triggerElement.type = 'button';
+    state.triggerElement.title = `Convert ${formatType(type)}`;
+    state.triggerElement.setAttribute(
+      'aria-label',
+      `Convert ${formatType(type)}`
+    );
+    state.triggerElement.innerHTML = `
+      <img src="${ICON_URL}" alt="" aria-hidden="true" />
+    `;
+
+    state.triggerElement.addEventListener(
+      'mousedown',
+      (event) => event.stopPropagation()
+    );
+
+    state.triggerElement.addEventListener(
+      'click',
+      handleTriggerClick
+    );
+
+    document.documentElement.appendChild(
+      state.triggerElement
+    );
+
+    positionTrigger();
+  }
+
+  async function handleTriggerClick(event) {
+    event.stopPropagation();
+
+    const text = state.pendingSelectionText;
+
+    if (!text) {
+      return;
+    }
+
+    const trigger = state.triggerElement;
+
+    if (trigger) {
+      trigger.disabled = true;
+    }
+
+    try {
+      const data = await chrome.runtime.sendMessage({
+        type: 'CONVERT_SELECTION',
+        text,
+        locale: navigator.languages?.[0] || navigator.language
+      });
+
+      if (!data || data.ignored) {
+        hideTrigger();
+        return;
+      }
+
+      showResult(data);
+    } catch {
+      hideTrigger();
+    }
+  }
+
   function showResult(data) {
+    hideTrigger();
     hideResult();
 
     if (!data) {
@@ -34,7 +104,10 @@
       ? buildSuccessMarkup(data)
       : buildErrorMarkup(data);
 
-    document.documentElement.appendChild(state.resultElement);
+    document.documentElement.appendChild(
+      state.resultElement
+    );
+
     bindResultEvents();
     positionResult();
   }
@@ -43,6 +116,12 @@
     state.resultElement?.remove();
     state.resultElement = null;
     state.currentConversion = null;
+  }
+
+  function hideTrigger() {
+    state.triggerElement?.remove();
+    state.triggerElement = null;
+    state.pendingSelectionText = null;
   }
 
   function buildBrandMarkup() {
@@ -75,6 +154,7 @@
     const category = data.type.toUpperCase();
     const targetSelect = buildTargetSelect(data);
     const metadata = buildMetadata(data);
+    const liveRateLink = buildLiveRateLink(data);
 
     return `
       <div class="qc-header">
@@ -102,6 +182,7 @@
       </div>
 
       ${metadata}
+      ${liveRateLink}
     `;
   }
 
@@ -132,8 +213,17 @@
   }
 
   function buildMetadata(data) {
-    if (data.type !== 'currency') {
+    if (!Number.isFinite(data.rate)) {
       return '';
+    }
+
+    const baseRate = `
+      1 ${escapeHtml(data.fromUnit)} =
+      ${formatNumber(data.rate, 6)} ${escapeHtml(data.toUnit)}
+    `;
+
+    if (data.type !== 'currency') {
+      return `<div class="qc-meta">${baseRate}</div>`;
     }
 
     const date = data.date
@@ -142,20 +232,46 @@
 
     return `
       <div class="qc-meta">
-        1 ${escapeHtml(data.fromUnit)} =
-        ${formatNumber(data.rate, 6)} ${escapeHtml(data.toUnit)} ·
-        ${escapeHtml(data.provider)}${date}
+        ${baseRate} · ${escapeHtml(data.provider)}${date}
       </div>
+    `;
+  }
+
+  function buildLiveRateLink(data) {
+    if (data.type !== 'currency') {
+      return '';
+    }
+
+    const query = `${data.value} ${data.fromUnit} to ${data.toUnit}`;
+    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
+    return `
+      <a
+        class="qc-live-rate"
+        href="${url}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View live rate on Google →
+      </a>
     `;
   }
 
   function bindResultEvents() {
     bindCopyButton();
     bindTargetSelect();
+
+    state.resultElement
+      ?.querySelector('.qc-live-rate')
+      ?.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
   }
 
   function bindCopyButton() {
-    const copyButton = state.resultElement?.querySelector('.qc-copy');
+    const copyButton = state.resultElement?.querySelector(
+      '.qc-copy'
+    );
 
     copyButton?.addEventListener('click', async (event) => {
       event.stopPropagation();
@@ -181,7 +297,9 @@
   }
 
   function bindTargetSelect() {
-    const select = state.resultElement?.querySelector('.qc-select');
+    const select = state.resultElement?.querySelector(
+      '.qc-select'
+    );
 
     select?.addEventListener('mousedown', (event) => {
       event.stopPropagation();
@@ -218,6 +336,34 @@
         }
       }
     });
+  }
+
+  function positionTrigger() {
+    if (!state.triggerElement || !state.selectionRect) {
+      return;
+    }
+
+    const margin = 8;
+    const gap = 6;
+    const rect = state.selectionRect;
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const width = state.triggerElement.offsetWidth;
+    const height = state.triggerElement.offsetHeight;
+
+    let left = rect.right + gap;
+    let top = rect.bottom + gap;
+
+    if (left + width > viewportWidth - margin) {
+      left = rect.left - width - gap;
+    }
+
+    if (top + height > viewportHeight - margin) {
+      top = rect.top - height - gap;
+    }
+
+    state.triggerElement.style.left = `${Math.max(margin, left)}px`;
+    state.triggerElement.style.top = `${Math.max(margin, top)}px`;
   }
 
   function positionResult() {
@@ -262,6 +408,11 @@
     state.resultElement.style.top = `${top}px`;
   }
 
+  function formatType(type) {
+    return String(type || '')
+      .replace(/^./, (char) => char.toUpperCase());
+  }
+
   function escapeHtml(value) {
     const element = document.createElement('div');
     element.textContent = String(value ?? '');
@@ -277,7 +428,9 @@
   globalThis.QuickConverterContent = {
     ...(globalThis.QuickConverterContent || {}),
     hideResult,
+    hideTrigger,
     setSelectionRect,
-    showResult
+    showResult,
+    showTrigger
   };
 })();

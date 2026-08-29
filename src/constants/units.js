@@ -3,14 +3,14 @@ export const UNIT_TYPES = {
     label: 'Length',
     defaultTarget: 'km',
     units: {
-      mm: unit('mm', ['mm', 'millimeter', 'millimeters', 'millimetre', 'millimetres'], 0.001),
-      cm: unit('cm', ['cm', 'centimeter', 'centimeters', 'centimetre', 'centimetres'], 0.01),
-      m: unit('m', ['m', 'meter', 'meters', 'metre', 'metres'], 1),
-      km: unit('km', ['km', 'kilometer', 'kilometers', 'kilometre', 'kilometres'], 1000),
-      in: unit('in', ['in', 'inch', 'inches'], 0.0254),
-      ft: unit('ft', ['ft', 'foot', 'feet'], 0.3048),
-      yd: unit('yd', ['yd', 'yard', 'yards'], 0.9144),
-      mi: unit('mi', ['mi', 'mile', 'miles'], 1609.344)
+      mm: unit('mm', 'Millimeter', ['mm', 'millimeter', 'millimeters', 'millimetre', 'millimetres'], 0.001),
+      cm: unit('cm', 'Centimeter', ['cm', 'centimeter', 'centimeters', 'centimetre', 'centimetres'], 0.01),
+      m: unit('m', 'Meter', ['m', 'meter', 'meters', 'metre', 'metres'], 1),
+      km: unit('km', 'Kilometer', ['km', 'kilometer', 'kilometers', 'kilometre', 'kilometres'], 1000),
+      in: unit('in', 'Inch', ['in', 'inch', 'inches'], 0.0254),
+      ft: unit('ft', 'Foot', ['ft', 'foot', 'feet'], 0.3048),
+      yd: unit('yd', 'Yard', ['yd', 'yard', 'yards'], 0.9144),
+      mi: unit('mi', 'Mile', ['mi', 'mile', 'miles'], 1609.344)
     }
   },
 
@@ -18,12 +18,12 @@ export const UNIT_TYPES = {
     label: 'Weight',
     defaultTarget: 'kg',
     units: {
-      mg: unit('mg', ['mg', 'milligram', 'milligrams'], 0.000001),
-      g: unit('g', ['g', 'gram', 'grams'], 0.001),
-      kg: unit('kg', ['kg', 'kilogram', 'kilograms', 'kilo', 'kilos'], 1),
-      oz: unit('oz', ['oz', 'ounce', 'ounces'], 0.028349523125),
-      lb: unit('lb', ['lb', 'lbs', 'pound', 'pounds'], 0.45359237),
-      ton: unit('ton', ['ton', 'tons', 'tonne', 'tonnes'], 1000)
+      mg: unit('mg', 'Milligram', ['mg', 'milligram', 'milligrams'], 0.000001),
+      g: unit('g', 'Gram', ['g', 'gram', 'grams'], 0.001),
+      kg: unit('kg', 'Kilogram', ['kg', 'kilogram', 'kilograms', 'kilo', 'kilos'], 1),
+      oz: unit('oz', 'Ounce', ['oz', 'ounce', 'ounces'], 0.028349523125),
+      lb: unit('lb', 'Pound', ['lb', 'lbs', 'pound', 'pounds'], 0.45359237),
+      ton: unit('ton', 'Ton', ['ton', 'tons', 'tonne', 'tonnes'], 1000)
     }
   },
 
@@ -31,18 +31,9 @@ export const UNIT_TYPES = {
     label: 'Temperature',
     defaultTarget: '°C',
     units: {
-      '°C': {
-        label: '°C',
-        aliases: ['°c', 'c', 'celsius', 'centigrade']
-      },
-      '°F': {
-        label: '°F',
-        aliases: ['°f', 'f', 'fahrenheit']
-      },
-      K: {
-        label: 'K',
-        aliases: ['k', 'kelvin', 'kelvins']
-      }
+      '°C': temperatureUnit('°C', 'Celsius', ['°c', 'c', 'celsius', 'centigrade']),
+      '°F': temperatureUnit('°F', 'Fahrenheit', ['°f', 'f', 'fahrenheit']),
+      K: temperatureUnit('K', 'Kelvin', ['k', 'kelvin', 'kelvins'])
     }
   },
 
@@ -50,12 +41,12 @@ export const UNIT_TYPES = {
     label: 'Data',
     defaultTarget: 'MB',
     units: {
-      bit: dataUnit('bit', ['bit', 'bits'], 0.125),
-      Byte: dataUnit('Byte', ['byte', 'bytes', 'b'], 1),
-      KB: dataUnit('KB', ['kb', 'kilobyte', 'kilobytes'], 1000),
-      MB: dataUnit('MB', ['mb', 'megabyte', 'megabytes'], 1000000),
-      GB: dataUnit('GB', ['gb', 'gigabyte', 'gigabytes'], 1000000000),
-      TB: dataUnit('TB', ['tb', 'terabyte', 'terabytes'], 1000000000000)
+      bit: dataUnit('bit', 'Bit', ['bit', 'bits'], 0.125),
+      Byte: dataUnit('Byte', 'Byte', ['byte', 'bytes', 'b'], 1),
+      KB: dataUnit('KB', 'Kilobyte', ['kb', 'kilobyte', 'kilobytes'], 1000),
+      MB: dataUnit('MB', 'Megabyte', ['mb', 'megabyte', 'megabytes'], 1000000),
+      GB: dataUnit('GB', 'Gigabyte', ['gb', 'gigabyte', 'gigabytes'], 1000000000),
+      TB: dataUnit('TB', 'Terabyte', ['tb', 'terabyte', 'terabytes'], 1000000000000)
     }
   }
 };
@@ -63,9 +54,7 @@ export const UNIT_TYPES = {
 const ALIAS_INDEX = buildAliasIndex();
 
 export function resolveUnit(alias) {
-  return ALIAS_INDEX.get(
-    String(alias).trim().toLowerCase()
-  ) || null;
+  return ALIAS_INDEX.get(String(alias).trim().toLowerCase()) || null;
 }
 
 export function getDefaultTarget(type) {
@@ -82,10 +71,7 @@ function buildAliasIndex() {
   for (const [type, config] of Object.entries(UNIT_TYPES)) {
     for (const [unitCode, definition] of Object.entries(config.units)) {
       for (const alias of definition.aliases) {
-        index.set(alias.toLowerCase(), {
-          type,
-          unit: unitCode
-        });
+        index.set(alias.toLowerCase(), { type, unit: unitCode });
       }
     }
   }
@@ -93,18 +79,14 @@ function buildAliasIndex() {
   return index;
 }
 
-function unit(label, aliases, factor) {
-  return {
-    label,
-    aliases,
-    factor
-  };
+function unit(label, name, aliases, factor) {
+  return { label, name, aliases, factor };
 }
 
-function dataUnit(label, aliases, bytes) {
-  return {
-    label,
-    aliases,
-    bytes
-  };
+function temperatureUnit(label, name, aliases) {
+  return { label, name, aliases };
+}
+
+function dataUnit(label, name, aliases, bytes) {
+  return { label, name, aliases, bytes };
 }

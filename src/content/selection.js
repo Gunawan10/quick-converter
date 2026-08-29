@@ -7,7 +7,7 @@
   function setupSelectionListeners() {
     document.addEventListener(
       'mouseup',
-      scheduleSelectionConversion,
+      scheduleSelectionDetection,
       true
     );
 
@@ -26,40 +26,46 @@
       return;
     }
 
-    scheduleSelectionConversion();
+    scheduleSelectionDetection();
   }
 
-  function scheduleSelectionConversion() {
+  function scheduleSelectionDetection() {
     clearTimeout(selectionTimer);
 
     selectionTimer = setTimeout(
-      convertCurrentSelection,
+      detectCurrentSelection,
       SELECTION_DELAY_MS
     );
   }
 
-  async function convertCurrentSelection() {
+  async function detectCurrentSelection() {
     const selection = window.getSelection();
 
     if (!isValidSelection(selection)) {
+      QuickConverterContent.hideTrigger();
       return;
     }
 
     const text = selection.toString().trim();
 
     if (!isSupportedSelectionText(text)) {
+      QuickConverterContent.hideTrigger();
       return;
     }
 
     rememberSelectionRect(selection);
 
-    const data = await requestConversion(text);
+    const detection = await detectSelection(text);
 
-    if (!data || data.ignored) {
+    if (!detection?.recognized) {
+      QuickConverterContent.hideTrigger();
       return;
     }
 
-    QuickConverterContent.showResult(data);
+    QuickConverterContent.showTrigger(
+      text,
+      detection.type
+    );
   }
 
   function isValidSelection(selection) {
@@ -87,10 +93,10 @@
     }
   }
 
-  async function requestConversion(text) {
+  async function detectSelection(text) {
     try {
       return await chrome.runtime.sendMessage({
-        type: 'CONVERT_SELECTION',
+        type: 'DETECT_SELECTION',
         text
       });
     } catch {

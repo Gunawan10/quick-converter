@@ -37,6 +37,13 @@ function convertMeasurement(parsed, options) {
     targetUnit
   );
 
+  const rate = convertUnit(
+    parsed.type,
+    1,
+    parsed.unit,
+    targetUnit
+  );
+
   return {
     success: true,
     type: parsed.type,
@@ -46,6 +53,7 @@ function convertMeasurement(parsed, options) {
     source: `${formatNumber(parsed.value)} ${getUnitLabel(parsed.type, parsed.unit)}`,
     result: `${formatNumber(convertedValue)} ${getUnitLabel(parsed.type, targetUnit)}`,
     convertedValue,
+    rate,
     targets: getUnitTargets(parsed.type)
   };
 }
@@ -91,6 +99,6 @@ function getUnitTargets(type) {
 
   return Object.entries(units).map(([code, unit]) => ({
     value: code,
-    label: unit.label
+    label: `${code} — ${unit.name || unit.label}`
   }));
 }

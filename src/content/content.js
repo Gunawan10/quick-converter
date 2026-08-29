@@ -11,13 +11,19 @@
         const resultElement = document.getElementById(
           'quick-converter-result'
         );
+        const triggerElement = document.getElementById(
+          'quick-converter-trigger'
+        );
 
         if (
-          resultElement &&
-          !resultElement.contains(event.target)
+          resultElement?.contains(event.target) ||
+          triggerElement?.contains(event.target)
         ) {
-          QuickConverterContent.hideResult();
+          return;
         }
+
+        QuickConverterContent.hideResult();
+        QuickConverterContent.hideTrigger();
       },
       true
     );
