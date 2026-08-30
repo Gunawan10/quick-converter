@@ -30,92 +30,71 @@ function createMockRateFetch(rate, date = '2026-08-29') {
 }
 
 test('10 km to mi', () => {
-  assertClose(
-    convertUnit('length', 10, 'km', 'mi'),
-    6.21371192
-  );
+  assertClose(convertUnit('length', 10, 'km', 'mi'), 6.21371192);
 });
 
 test('10 mi to km', () => {
-  assertClose(
-    convertUnit('length', 10, 'mi', 'km'),
-    16.09344
-  );
+  assertClose(convertUnit('length', 10, 'mi', 'km'), 16.09344);
+});
+
+test('metric length ladder conversions', () => {
+  assertClose(convertUnit('length', 1, 'km', 'hm'), 10);
+  assertClose(convertUnit('length', 1, 'hm', 'dam'), 10);
+  assertClose(convertUnit('length', 1, 'dam', 'm'), 10);
+  assertClose(convertUnit('length', 1, 'm', 'dm'), 10);
+  assertClose(convertUnit('length', 1, 'dm', 'cm'), 10);
+  assertClose(convertUnit('length', 1, 'cm', 'mm'), 10);
 });
 
 test('5 kg to lb', () => {
-  assertClose(
-    convertUnit('weight', 5, 'kg', 'lb'),
-    11.0231131
-  );
+  assertClose(convertUnit('weight', 5, 'kg', 'lb'), 11.0231131);
 });
 
 test('1000 g to kg', () => {
-  assertClose(
-    convertUnit('weight', 1000, 'g', 'kg'),
-    1
-  );
+  assertClose(convertUnit('weight', 1000, 'g', 'kg'), 1);
+});
+
+test('metric weight ladder conversions', () => {
+  assertClose(convertUnit('weight', 1, 'kg', 'hg'), 10);
+  assertClose(convertUnit('weight', 1, 'hg', 'dag'), 10);
+  assertClose(convertUnit('weight', 1, 'dag', 'g'), 10);
+  assertClose(convertUnit('weight', 1, 'g', 'dg'), 10);
+  assertClose(convertUnit('weight', 1, 'dg', 'cg'), 10);
+  assertClose(convertUnit('weight', 1, 'cg', 'mg'), 10);
 });
 
 test('0 C to F', () => {
-  assertClose(
-    convertUnit('temperature', 0, '°C', '°F'),
-    32
-  );
+  assertClose(convertUnit('temperature', 0, '°C', '°F'), 32);
 });
 
 test('100 C to F', () => {
-  assertClose(
-    convertUnit('temperature', 100, '°C', '°F'),
-    212
-  );
+  assertClose(convertUnit('temperature', 100, '°C', '°F'), 212);
 });
 
 test('100 C to Reaumur', () => {
-  assertClose(
-    convertUnit('temperature', 100, '°C', '°R'),
-    80
-  );
+  assertClose(convertUnit('temperature', 100, '°C', '°R'), 80);
 });
 
 test('80 Reaumur to C', () => {
-  assertClose(
-    convertUnit('temperature', 80, '°R', '°C'),
-    100
-  );
+  assertClose(convertUnit('temperature', 80, '°R', '°C'), 100);
 });
 
 test('80 Reaumur to F', () => {
-  assertClose(
-    convertUnit('temperature', 80, '°R', '°F'),
-    212
-  );
+  assertClose(convertUnit('temperature', 80, '°R', '°F'), 212);
 });
 
 test('5 GB to MB', () => {
-  assertClose(
-    convertUnit('data', 5, 'GB', 'MB'),
-    5000
-  );
+  assertClose(convertUnit('data', 5, 'GB', 'MB'), 5000);
 });
 
 test('8 bit to Byte', () => {
-  assertClose(
-    convertUnit('data', 8, 'bit', 'Byte'),
-    1
-  );
+  assertClose(convertUnit('data', 8, 'bit', 'Byte'), 1);
 });
 
 test('measurement conversion returns rate, formula and targets', async () => {
   const result = await convert(
-    {
-      type: 'length',
-      value: 10,
-      unit: 'mi'
-    },
-    {
-      targetUnit: 'km'
-    }
+    { type: 'length', value: 10, unit: 'mi' },
+    { targetUnit: 'km' }
   );
 
   assert.equal(result.success, true);
@@ -127,16 +106,46 @@ test('measurement conversion returns rate, formula and targets', async () => {
   assert.ok(result.targets.some((target) => target.value === 'km'));
 });
 
+test('length targets are ordered metric large-to-small then imperial', async () => {
+  const result = await convert(
+    { type: 'length', value: 1, unit: 'm' },
+    { targetUnit: 'km' }
+  );
+
+  assert.deepEqual(
+    result.targets.map((target) => target.value),
+    ['km', 'hm', 'dam', 'm', 'dm', 'cm', 'mm', 'mi', 'yd', 'ft', 'in']
+  );
+});
+
+test('weight targets are ordered metric large-to-small then imperial', async () => {
+  const result = await convert(
+    { type: 'weight', value: 1, unit: 'g' },
+    { targetUnit: 'kg' }
+  );
+
+  assert.deepEqual(
+    result.targets.map((target) => target.value),
+    ['ton', 'kg', 'hg', 'dag', 'g', 'dg', 'cg', 'mg', 'lb', 'oz']
+  );
+});
+
+test('data targets are ordered large-to-small', async () => {
+  const result = await convert(
+    { type: 'data', value: 1, unit: 'MB' },
+    { targetUnit: 'GB' }
+  );
+
+  assert.deepEqual(
+    result.targets.map((target) => target.value),
+    ['TB', 'GB', 'MB', 'KB', 'Byte', 'bit']
+  );
+});
+
 test('temperature conversion exposes Reaumur as a target', async () => {
   const result = await convert(
-    {
-      type: 'temperature',
-      value: 100,
-      unit: '°C'
-    },
-    {
-      targetUnit: '°R'
-    }
+    { type: 'temperature', value: 100, unit: '°C' },
+    { targetUnit: '°R' }
   );
 
   assert.equal(result.success, true);
@@ -146,16 +155,22 @@ test('temperature conversion exposes Reaumur as a target', async () => {
   assert.ok(result.targets.some((target) => target.value === '°R'));
 });
 
+test('temperature targets keep familiar order', async () => {
+  const result = await convert(
+    { type: 'temperature', value: 0, unit: '°C' },
+    { targetUnit: '°F' }
+  );
+
+  assert.deepEqual(
+    result.targets.map((target) => target.value),
+    ['°C', '°F', 'K', '°R']
+  );
+});
+
 test('temperature formula follows conversion direction', async () => {
   const result = await convert(
-    {
-      type: 'temperature',
-      value: 32,
-      unit: '°F'
-    },
-    {
-      targetUnit: '°C'
-    }
+    { type: 'temperature', value: 32, unit: '°F' },
+    { targetUnit: '°C' }
   );
 
   assert.equal(result.formula, '°C = (°F − 32) × 5/9');
@@ -163,14 +178,8 @@ test('temperature formula follows conversion direction', async () => {
 
 test('data conversion returns multiplier formula', async () => {
   const result = await convert(
-    {
-      type: 'data',
-      value: 5,
-      unit: 'GB'
-    },
-    {
-      targetUnit: 'MB'
-    }
+    { type: 'data', value: 5, unit: 'GB' },
+    { targetUnit: 'MB' }
   );
 
   assert.equal(result.formula, 'MB = GB × 1,000');
@@ -178,11 +187,7 @@ test('data conversion returns multiplier formula', async () => {
 
 test('currency uses mocked exchange rate and preserves metadata', async () => {
   const result = await convert(
-    {
-      type: 'currency',
-      value: 2,
-      unit: 'USD'
-    },
+    { type: 'currency', value: 2, unit: 'USD' },
     {
       targetCurrency: 'IDR',
       storage: createMockStorage(),
@@ -204,11 +209,7 @@ test('currency rateOverride avoids fetching a reverse rate', async () => {
   let fetchCalls = 0;
 
   const result = await convert(
-    {
-      type: 'currency',
-      value: 15926400,
-      unit: 'IDR'
-    },
+    { type: 'currency', value: 15926400, unit: 'IDR' },
     {
       targetCurrency: 'USD',
       rateOverride: 1 / 17696,
@@ -231,11 +232,7 @@ test('currency reciprocal rate remains stable across repeated swaps', async () =
   const originalRate = 17696;
 
   const forward = await convert(
-    {
-      type: 'currency',
-      value: 900,
-      unit: 'USD'
-    },
+    { type: 'currency', value: 900, unit: 'USD' },
     {
       targetCurrency: 'IDR',
       rateOverride: originalRate,
@@ -244,11 +241,7 @@ test('currency reciprocal rate remains stable across repeated swaps', async () =
   );
 
   const reverse = await convert(
-    {
-      type: 'currency',
-      value: forward.convertedValue,
-      unit: 'IDR'
-    },
+    { type: 'currency', value: forward.convertedValue, unit: 'IDR' },
     {
       targetCurrency: 'USD',
       rateOverride: 1 / forward.rate,
@@ -257,11 +250,7 @@ test('currency reciprocal rate remains stable across repeated swaps', async () =
   );
 
   const forwardAgain = await convert(
-    {
-      type: 'currency',
-      value: reverse.convertedValue,
-      unit: 'USD'
-    },
+    { type: 'currency', value: reverse.convertedValue, unit: 'USD' },
     {
       targetCurrency: 'IDR',
       rateOverride: 1 / reverse.rate,
