@@ -4,6 +4,7 @@
   let frameId = null;
 
   const originalSetSelectionRect = QuickConverterContent.setSelectionRect;
+  const originalShowTrigger = QuickConverterContent.showTrigger;
 
   QuickConverterContent.setSelectionRect = function setAnchoredSelectionRect(rect) {
     originalSetSelectionRect(rect);
@@ -18,6 +19,11 @@
     };
 
     selectionRange = getCurrentSelectionRange();
+  };
+
+  QuickConverterContent.showTrigger = function showAnchoredTrigger(...args) {
+    originalShowTrigger(...args);
+    scheduleReposition();
   };
 
   window.addEventListener('scroll', scheduleReposition, true);
@@ -129,25 +135,26 @@
 
   function positionTrigger(trigger, rect) {
     const margin = 8;
-    const gap = 7;
+    const gap = 5;
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
     const width = trigger.offsetWidth;
     const height = trigger.offsetHeight;
 
     let left = rect.right + gap;
-    let top = rect.bottom + gap;
+    let top = rect.top + (rect.height - height) / 2;
 
     if (left + width > viewportWidth - margin) {
       left = rect.left - width - gap;
     }
 
-    if (top + height > viewportHeight - margin) {
-      top = rect.top - height - gap;
-    }
+    top = Math.max(
+      margin,
+      Math.min(top, viewportHeight - height - margin)
+    );
 
     trigger.style.left = `${Math.max(margin, left)}px`;
-    trigger.style.top = `${Math.max(margin, top)}px`;
+    trigger.style.top = `${top}px`;
   }
 
   function positionCard(card, rect) {
