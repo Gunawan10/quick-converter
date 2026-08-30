@@ -12,10 +12,12 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 
 - **Instant Selection Conversion** — select teks di webpage, lalu klik Quick Converter icon yang muncul dekat selection untuk melihat hasil langsung.
 - **Multiple Converter Types** — support currency, length, weight, temperature, dan data size.
-- **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, dan `100 MB`.
+- **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°Ré`, dan `100 MB`.
 - **Quick Target Switching** — ganti target unit atau currency langsung dari dropdown di result card.
 - **Reverse Conversion** — balik arah conversion dengan tombol swap tanpa harus select ulang teks.
-- **Adaptive Result Card** — nilai pendek tampil horizontal, sedangkan nilai panjang otomatis stacked dan centered supaya tetap rapi.
+- **Adaptive Result Card** — nilai pendek tampil compact, sedangkan nilai panjang otomatis memakai stacked side layout supaya tetap rapi.
+- **Converter Context** — nama converter seperti `Length`, `Temperature`, atau `Currency` tampil sebagai subtitle di header card.
+- **Unit Pair Footer** — unit converter menampilkan arah conversion seperti `km → mi` atau `°C → °Ré` di footer.
 - **Currency by Region** — default target currency mengikuti saved preference atau browser locale/region, dengan fallback `IDR`.
 - **Live Currency Rates** — currency card menampilkan exchange rate, provider, last updated date, dan link untuk melihat live rate di Google.
 - **Copy Result** — copy hasil conversion langsung dari card dengan satu klik.
@@ -37,9 +39,26 @@ Default target: `kg`
 
 ### Temperature
 
-`°C`, `°F`, `K`
+`°C`, `°F`, `K`, `°Ré`
 
 Default target: `°C`
+
+Réaumur menggunakan canonical display `°Ré` dan parser menerima beberapa variasi seperti:
+
+```text
+80°Ré
+80°Re
+80 Reaumur
+80 Reamur
+```
+
+Contoh conversion:
+
+```text
+100°C = 80°Ré
+80°Ré = 100°C
+80°Ré = 212°F
+```
 
 ### Data
 
@@ -68,7 +87,8 @@ Exchange-rate provider: Frankfurter.
 1. Select supported value di webpage.
 2. Quick Converter mendeteksi jenis value dan menampilkan small trigger icon dekat selection.
 3. Klik icon untuk membuka floating result card.
-4. Dari card, user bisa ganti target, swap conversion, copy hasil, atau melihat live currency rate.
+4. Header card menampilkan nama converter dan target dropdown.
+5. Dari card, user bisa ganti target, swap conversion, copy hasil, atau melihat live currency rate.
 
 Contoh input:
 
@@ -76,6 +96,7 @@ Contoh input:
 10 miles
 5 kg
 72°F
+80°Ré
 5 GB
 $100
 100 USD
@@ -93,15 +114,17 @@ Nilai pendek tetap compact:
 10 mi   ⇄   16.09344 km
 ```
 
-Nilai panjang berubah menjadi stacked layout:
+Untuk nilai panjang, source dan result ditumpuk secara vertikal di sisi kiri, sementara swap control berada di side rail kanan di antara keduanya.
 
 ```text
+FROM                     ⇅
 $900.00
-   ⇅
+
+TO
 IDR 15,926,400.00
 ```
 
-Source, swap control, dan result dibuat centered saat stacked supaya tidak overflow keluar card.
+Layout ini menjaga card tetap compact tanpa membuat long value overflow keluar card.
 
 ## Swap / reverse conversion
 
@@ -111,6 +134,7 @@ Contoh unit:
 
 ```text
 10 mi ⇄ 16.09344 km
+100°C ⇄ 80°Ré
 ```
 
 Contoh currency:
@@ -172,8 +196,10 @@ converter
   ↓
 result UI
   ├─ adaptive layout
+  ├─ stacked side layout
   ├─ target dropdown
   ├─ swap control
+  ├─ converter subtitle
   └─ copy / live-rate actions
 ```
 
@@ -181,8 +207,10 @@ Main rules:
 
 - Parser hanya mengenali supported values dan aliases.
 - Conversion formulas tidak berada di DOM/content UI code.
+- Temperature conversion menggunakan Celsius sebagai intermediate base untuk `°C`, `°F`, `K`, dan `°Ré`.
 - Currency API request berjalan di background context.
 - Result UI hanya menangani interaction dan presentation.
+- Converter type disimpan sebagai card metadata, tidak bergantung pada teks footer.
 - Raw conversion values digunakan untuk calculation; formatted values hanya untuk display.
 - Popup dan options tetap terpisah dari selection-card flow.
 
@@ -206,8 +234,15 @@ src/
     content.css
     adaptive-layout.js
     adaptive-layout.css
+    stacked-side-layout.css
     swap-control.js
     swap-control.css
+    mockup-layout.js
+    theme-control.js
+    theme.css
+    header-brand.js
+    header-brand.css
+    positioning-control.js
   services/
     converter.js
     exchange-rate.js
@@ -251,7 +286,9 @@ Test suite mencakup:
 - aliases dan invalid input;
 - length conversion;
 - weight conversion;
-- temperature conversion;
+- temperature conversion untuk Celsius, Fahrenheit, Kelvin, dan Réaumur;
+- Réaumur parser aliases seperti `°Ré`, `°Re`, `Reaumur`, dan `Reamur`;
+- Réaumur target availability di converter metadata;
 - data conversion;
 - unit conversion metadata;
 - mocked currency exchange rate;
@@ -259,7 +296,15 @@ Test suite mencakup:
 - currency rate override tanpa reverse API request;
 - reciprocal-rate round-trip untuk mencegah precision drift saat swap berkali-kali.
 
-Regression case utama:
+Temperature regression examples:
+
+```text
+100°C → 80°Ré
+80°Ré → 100°C
+80°Ré → 212°F
+```
+
+Currency regression case utama:
 
 ```text
 $900
