@@ -12,12 +12,12 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 
 - **Instant Selection Conversion** — select teks di webpage, lalu klik Quick Converter icon yang muncul dekat selection untuk melihat hasil langsung.
 - **Multiple Converter Types** — support currency, length, weight, temperature, dan data size.
-- **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°Ré`, dan `100 MB`.
+- **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°R`, dan `100 MB`.
 - **Quick Target Switching** — ganti target unit atau currency langsung dari dropdown di result card.
 - **Reverse Conversion** — balik arah conversion dengan tombol swap tanpa harus select ulang teks.
 - **Adaptive Result Card** — nilai pendek tampil compact, sedangkan nilai panjang otomatis memakai stacked side layout supaya tetap rapi.
 - **Converter Context** — nama converter seperti `Length`, `Temperature`, atau `Currency` tampil sebagai subtitle di header card.
-- **Unit Pair Footer** — unit converter menampilkan arah conversion seperti `km → mi` atau `°C → °Ré` di footer.
+- **Unit Pair Footer** — unit converter menampilkan arah conversion seperti `km → mi` atau `°C → °R` di footer.
 - **Currency by Region** — default target currency mengikuti saved preference atau browser locale/region, dengan fallback `IDR`.
 - **Live Currency Rates** — currency card menampilkan exchange rate, provider, last updated date, dan link untuk melihat live rate di Google.
 - **Copy Result** — copy hasil conversion langsung dari card dengan satu klik.
@@ -39,13 +39,15 @@ Default target: `kg`
 
 ### Temperature
 
-`°C`, `°F`, `K`, `°Ré`
+`°C`, `°F`, `K`, `°R`
 
 Default target: `°C`
 
-Réaumur menggunakan canonical display `°Ré` dan parser menerima beberapa variasi seperti:
+Réaumur menggunakan canonical display `°R`. Parser tetap menerima beberapa variasi lain seperti:
 
 ```text
+80°R
+80 R
 80°Ré
 80°Re
 80 Reaumur
@@ -55,9 +57,9 @@ Réaumur menggunakan canonical display `°Ré` dan parser menerima beberapa vari
 Contoh conversion:
 
 ```text
-100°C = 80°Ré
-80°Ré = 100°C
-80°Ré = 212°F
+100°C = 80°R
+80°R = 100°C
+80°R = 212°F
 ```
 
 ### Data
@@ -96,7 +98,7 @@ Contoh input:
 10 miles
 5 kg
 72°F
-80°Ré
+80°R
 5 GB
 $100
 100 USD
@@ -134,7 +136,7 @@ Contoh unit:
 
 ```text
 10 mi ⇄ 16.09344 km
-100°C ⇄ 80°Ré
+100°C ⇄ 80°R
 ```
 
 Contoh currency:
@@ -207,7 +209,7 @@ Main rules:
 
 - Parser hanya mengenali supported values dan aliases.
 - Conversion formulas tidak berada di DOM/content UI code.
-- Temperature conversion menggunakan Celsius sebagai intermediate base untuk `°C`, `°F`, `K`, dan `°Ré`.
+- Temperature conversion menggunakan Celsius sebagai intermediate base untuk `°C`, `°F`, `K`, dan `°R`.
 - Currency API request berjalan di background context.
 - Result UI hanya menangani interaction dan presentation.
 - Converter type disimpan sebagai card metadata, tidak bergantung pada teks footer.
@@ -287,7 +289,7 @@ Test suite mencakup:
 - length conversion;
 - weight conversion;
 - temperature conversion untuk Celsius, Fahrenheit, Kelvin, dan Réaumur;
-- Réaumur parser aliases seperti `°Ré`, `°Re`, `Reaumur`, dan `Reamur`;
+- Réaumur parser aliases seperti `°R`, `R`, `°Ré`, `°Re`, `Reaumur`, dan `Reamur`;
 - Réaumur target availability di converter metadata;
 - data conversion;
 - unit conversion metadata;
@@ -299,9 +301,9 @@ Test suite mencakup:
 Temperature regression examples:
 
 ```text
-100°C → 80°Ré
-80°Ré → 100°C
-80°Ré → 212°F
+100°C → 80°R
+80°R → 100°C
+80°R → 212°F
 ```
 
 Currency regression case utama:
