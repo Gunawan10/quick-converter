@@ -51,8 +51,11 @@
 }
 
 #quick-converter-result .qc-formula-line {
-  margin-top: 3px;
-  color: #7d869d;
-  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  color: #68718a;
+  font-size: 10.8px;
   line-height: 1.4;
 }
