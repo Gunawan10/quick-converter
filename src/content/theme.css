@@ -376,27 +376,27 @@
 }
 
 #quick-converter-trigger {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: 1px solid #d7d4ff;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #ffffff;
   box-shadow:
-    0 5px 14px rgba(98, 87, 246, 0.16),
-    0 1px 4px rgba(15, 23, 42, 0.08);
+    0 4px 10px rgba(98, 87, 246, 0.14),
+    0 1px 3px rgba(15, 23, 42, 0.07);
 }
 
 #quick-converter-trigger img {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 #quick-converter-trigger:hover {
   border-color: #aaa3ff;
   background: #f8f7ff;
   box-shadow:
-    0 7px 16px rgba(98, 87, 246, 0.18),
-    0 2px 5px rgba(15, 23, 42, 0.08);
+    0 5px 12px rgba(98, 87, 246, 0.17),
+    0 1px 4px rgba(15, 23, 42, 0.08);
 }
 
 @media (max-width: 380px) {
