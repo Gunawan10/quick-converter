@@ -18,6 +18,7 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 - **Adaptive Result Card** — nilai pendek tampil compact, sedangkan nilai panjang otomatis memakai stacked side layout supaya tetap rapi.
 - **Converter Context** — nama converter seperti `Length`, `Temperature`, atau `Currency` tampil sebagai subtitle di header card.
 - **Unit Pair Footer** — unit converter menampilkan arah conversion seperti `km → mi` atau `°C → °R` di footer.
+- **Conversion Formula** — unit converter menampilkan formula aktif di metadata panel, misalnya `mi = km × 0.621371` atau `°F = (°C × 9/5) + 32`.
 - **Currency by Region** — default target currency mengikuti saved preference atau browser locale/region, dengan fallback `IDR`.
 - **Live Currency Rates** — currency card menampilkan exchange rate, provider, last updated date, dan link untuk melihat live rate di Google.
 - **Copy Result** — copy hasil conversion langsung dari card dengan satu klik.
@@ -31,11 +32,15 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 
 Default target: `km`
 
+Formula menggunakan multiplier dari conversion rate aktif.
+
 ### Weight
 
 `mg`, `g`, `kg`, `oz`, `lb`, `ton`
 
 Default target: `kg`
+
+Formula menggunakan multiplier dari conversion rate aktif.
 
 ### Temperature
 
@@ -62,6 +67,16 @@ Contoh conversion:
 80°R = 212°F
 ```
 
+Temperature memakai formula eksplisit sesuai arah conversion, misalnya:
+
+```text
+°F = (°C × 9/5) + 32
+°C = (°F − 32) × 5/9
+°R = °C × 4/5
+°C = °R × 5/4
+K = °C + 273.15
+```
+
 ### Data
 
 `bit`, `Byte`, `KB`, `MB`, `GB`, `TB`
@@ -75,6 +90,8 @@ Data conversion menggunakan decimal SI units:
 1 MB = 1000 KB
 8 bit = 1 Byte
 ```
+
+Formula menggunakan multiplier dari conversion rate aktif.
 
 ### Currency
 
@@ -90,7 +107,8 @@ Exchange-rate provider: Frankfurter.
 2. Quick Converter mendeteksi jenis value dan menampilkan small trigger icon dekat selection.
 3. Klik icon untuk membuka floating result card.
 4. Header card menampilkan nama converter dan target dropdown.
-5. Dari card, user bisa ganti target, swap conversion, copy hasil, atau melihat live currency rate.
+5. Unit converter menampilkan rate + formula aktif di metadata panel.
+6. Dari card, user bisa ganti target, swap conversion, copy hasil, atau melihat live currency rate.
 
 Contoh input:
 
@@ -127,6 +145,28 @@ IDR 15,926,400.00
 ```
 
 Layout ini menjaga card tetap compact tanpa membuat long value overflow keluar card.
+
+## Unit rate and formula
+
+Unit converter menampilkan rate dan formula di metadata panel.
+
+Contoh length:
+
+```text
+1 km = 0.621371 mi
+Formula: mi = km × 0.621371
+```
+
+Contoh temperature:
+
+```text
+1 °C = 33.8 °F
+Formula: °F = (°C × 9/5) + 32
+```
+
+Formula berasal dari converter result, bukan dihitung dari teks DOM. Saat target diganti atau conversion di-swap, formula ikut dibuat ulang sesuai arah conversion terbaru.
+
+Currency tidak menampilkan formula unit karena memakai exchange rate aktif dari provider.
 
 ## Swap / reverse conversion
 
@@ -193,6 +233,7 @@ background service worker
 selection-parser
   ↓
 converter
+  ├─ unit conversion + formula metadata
   ├─ unit-converter
   └─ exchange-rate
   ↓
@@ -202,6 +243,7 @@ result UI
   ├─ target dropdown
   ├─ swap control
   ├─ converter subtitle
+  ├─ rate / formula metadata
   └─ copy / live-rate actions
 ```
 
@@ -209,6 +251,7 @@ Main rules:
 
 - Parser hanya mengenali supported values dan aliases.
 - Conversion formulas tidak berada di DOM/content UI code.
+- Formula dikirim sebagai metadata dari converter result dan UI hanya menampilkannya.
 - Temperature conversion menggunakan Celsius sebagai intermediate base untuk `°C`, `°F`, `K`, dan `°R`.
 - Currency API request berjalan di background context.
 - Result UI hanya menangani interaction dan presentation.
@@ -293,6 +336,9 @@ Test suite mencakup:
 - Réaumur target availability di converter metadata;
 - data conversion;
 - unit conversion metadata;
+- unit formula metadata untuk length/data;
+- directional temperature formulas;
+- currency result tidak membawa unit formula;
 - mocked currency exchange rate;
 - currency provider dan last updated date;
 - currency rate override tanpa reverse API request;
