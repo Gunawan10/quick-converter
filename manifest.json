@@ -33,7 +33,8 @@
         "src/content/adaptive-layout.css",
         "src/content/swap-control.css",
         "src/content/theme.css",
-        "src/content/stacked-side-layout.css"
+        "src/content/stacked-side-layout.css",
+        "src/content/header-brand.css"
       ],
       "js": [
         "src/content/result-ui.js",
@@ -42,6 +43,7 @@
         "src/content/swap-control.js",
         "src/content/mockup-layout.js",
         "src/content/theme-control.js",
+        "src/content/header-brand.js",
         "src/content/runtime.js",
         "src/content/selection.js",
         "src/content/content.js"
