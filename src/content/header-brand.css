@@ -44,6 +44,8 @@
   white-space: nowrap;
 }
 
-#quick-converter-result .qc-category {
-  display: none;
+#quick-converter-result .qc-category.qc-unit-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
