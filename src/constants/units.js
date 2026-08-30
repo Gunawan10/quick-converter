@@ -33,7 +33,8 @@ export const UNIT_TYPES = {
     units: {
       '°C': temperatureUnit('°C', 'Celsius', ['°c', 'c', 'celsius', 'centigrade']),
       '°F': temperatureUnit('°F', 'Fahrenheit', ['°f', 'f', 'fahrenheit']),
-      K: temperatureUnit('K', 'Kelvin', ['k', 'kelvin', 'kelvins'])
+      K: temperatureUnit('K', 'Kelvin', ['k', 'kelvin', 'kelvins']),
+      '°Ré': temperatureUnit('°Ré', 'Réaumur', ['°ré', '°re', 'ré', 're', 'réaumur', 'reaumur', 'reamur'])
     }
   },
 
