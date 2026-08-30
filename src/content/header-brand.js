@@ -1,4 +1,8 @@
 (() => {
+  const CARD_ICON_URL = chrome.runtime.getURL(
+    'assets/icons/icon48.png'
+  );
+
   const observer = new MutationObserver(() => {
     enhanceHeader();
   });
@@ -25,8 +29,17 @@
     const card = document.getElementById('quick-converter-result');
     const brand = card?.querySelector('.qc-brand');
     const title = brand?.querySelector('strong');
+    const logo = brand?.querySelector('.qc-logo');
 
-    if (!card || !brand || !title || brand.querySelector('.qc-brand-subtitle')) {
+    if (!card || !brand || !title) {
+      return;
+    }
+
+    if (logo && logo.src !== CARD_ICON_URL) {
+      logo.src = CARD_ICON_URL;
+    }
+
+    if (brand.querySelector('.qc-brand-subtitle')) {
       return;
     }
 
