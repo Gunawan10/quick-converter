@@ -43,6 +43,10 @@ function convertTemperature(value, from, to) {
     return celsius + 273.15;
   }
 
+  if (to === '°Ré') {
+    return celsius * 4 / 5;
+  }
+
   throw new Error('Unsupported temperature target');
 }
 
@@ -57,6 +61,10 @@ function toCelsius(value, unit) {
 
   if (unit === 'K') {
     return value - 273.15;
+  }
+
+  if (unit === '°Ré') {
+    return value * 5 / 4;
   }
 
   throw new Error('Unsupported temperature unit');
