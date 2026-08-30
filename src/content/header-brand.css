@@ -19,6 +19,7 @@
   border-radius: 0;
   background: transparent;
   object-fit: contain;
+  image-rendering: auto;
 }
 
 #quick-converter-result .qc-brand-text {
@@ -41,4 +42,8 @@
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#quick-converter-result .qc-category {
+  display: none;
 }
