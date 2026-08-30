@@ -3,9 +3,9 @@
 }
 
 #quick-converter-result .qc-logo-wrap {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -13,8 +13,8 @@
 }
 
 #quick-converter-result .qc-logo {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border-radius: 0;
   background: transparent;
