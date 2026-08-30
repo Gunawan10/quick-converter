@@ -256,9 +256,14 @@
     `;
 
     if (data.type !== 'currency') {
+      const formulaLine = data.formula
+        ? `<div class="qc-formula-line">Formula: ${escapeHtml(data.formula)}</div>`
+        : '';
+
       return `
         <div class="qc-meta-panel">
           <div class="qc-rate-line">${rateLine}</div>
+          ${formulaLine}
         </div>
       `;
     }
