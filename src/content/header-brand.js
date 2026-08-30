@@ -76,6 +76,13 @@
       return;
     }
 
+    if (
+      category.classList.contains('qc-unit-pair') &&
+      category.textContent?.trim() === pair
+    ) {
+      return;
+    }
+
     category.textContent = pair;
     category.classList.add('qc-unit-pair');
   }
