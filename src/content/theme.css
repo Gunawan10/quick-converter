@@ -19,38 +19,6 @@
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-#quick-converter-result[data-converter-type='length'] {
-  --qc-accent: #3b8ff5;
-  --qc-accent-strong: #2378dc;
-  --qc-accent-soft: #eaf4ff;
-  --qc-accent-softer: #f6faff;
-  --qc-accent-border: #cfe6ff;
-}
-
-#quick-converter-result[data-converter-type='weight'] {
-  --qc-accent: #1fc27a;
-  --qc-accent-strong: #11975c;
-  --qc-accent-soft: #e9fbf2;
-  --qc-accent-softer: #f5fdf9;
-  --qc-accent-border: #c8f2dd;
-}
-
-#quick-converter-result[data-converter-type='temperature'] {
-  --qc-accent: #ff7a12;
-  --qc-accent-strong: #e76400;
-  --qc-accent-soft: #fff1e5;
-  --qc-accent-softer: #fff9f4;
-  --qc-accent-border: #ffd8b8;
-}
-
-#quick-converter-result[data-converter-type='data'] {
-  --qc-accent: #8b52ef;
-  --qc-accent-strong: #7436dc;
-  --qc-accent-soft: #f2eaff;
-  --qc-accent-softer: #faf7ff;
-  --qc-accent-border: #dfcdfd;
-}
-
 #quick-converter-result .qc-header {
   min-height: 66px;
   padding: 13px 15px;
