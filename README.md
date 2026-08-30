@@ -14,6 +14,7 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 - **Multiple Converter Types** — support currency, length, weight, temperature, dan data size.
 - **Smart Detection** — mengenali format seperti `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°R`, dan `100 MB`.
 - **Quick Target Switching** — ganti target unit atau currency langsung dari dropdown di result card.
+- **Ordered Unit Dropdowns** — unit disusun dengan urutan yang lebih mudah discan: metric besar → kecil, lalu imperial jika ada.
 - **Reverse Conversion** — balik arah conversion dengan tombol swap tanpa harus select ulang teks.
 - **Adaptive Result Card** — nilai pendek tampil compact, sedangkan nilai panjang otomatis memakai stacked side layout supaya tetap rapi.
 - **Converter Context** — nama converter seperti `Length`, `Temperature`, atau `Currency` tampil sebagai subtitle di header card.
@@ -28,15 +29,41 @@ select text → click Quick Converter icon → lihat hasil → ganti target / sw
 
 ### Length
 
-`mm`, `cm`, `m`, `km`, `in`, `ft`, `yd`, `mi`
+Metric units, besar → kecil:
+
+`km`, `hm`, `dam`, `m`, `dm`, `cm`, `mm`
+
+Imperial units:
+
+`mi`, `yd`, `ft`, `in`
+
+Dropdown order:
+
+```text
+km → hm → dam → m → dm → cm → mm → mi → yd → ft → in
+```
 
 Default target: `km`
+
+Parser juga menerima `dkm` sebagai alias untuk `dam` agar input yang umum dipakai secara lokal tetap dikenali.
 
 Formula menggunakan multiplier dari conversion rate aktif.
 
 ### Weight
 
-`mg`, `g`, `kg`, `oz`, `lb`, `ton`
+Metric units, besar → kecil:
+
+`ton`, `kg`, `hg`, `dag`, `g`, `dg`, `cg`, `mg`
+
+Imperial units:
+
+`lb`, `oz`
+
+Dropdown order:
+
+```text
+ton → kg → hg → dag → g → dg → cg → mg → lb → oz
+```
 
 Default target: `kg`
 
@@ -45,6 +72,12 @@ Formula menggunakan multiplier dari conversion rate aktif.
 ### Temperature
 
 `°C`, `°F`, `K`, `°R`
+
+Dropdown order tetap familiar karena temperature tidak memiliki urutan besar → kecil:
+
+```text
+°C → °F → K → °R
+```
 
 Default target: `°C`
 
@@ -79,7 +112,11 @@ K = °C + 273.15
 
 ### Data
 
-`bit`, `Byte`, `KB`, `MB`, `GB`, `TB`
+Dropdown order besar → kecil:
+
+```text
+TB → GB → MB → KB → Byte → bit
+```
 
 Default target: `MB`
 
@@ -114,7 +151,8 @@ Contoh input:
 
 ```text
 10 miles
-5 kg
+2 hm
+5 dag
 72°F
 80°R
 5 GB
@@ -148,20 +186,20 @@ Layout ini menjaga card tetap compact tanpa membuat long value overflow keluar c
 
 ## Unit rate and formula
 
-Unit converter menampilkan rate dan formula di metadata panel.
+Unit converter menampilkan rate dan formula di metadata panel dengan pattern visual yang sama seperti metadata currency.
 
 Contoh length:
 
 ```text
 1 km = 0.621371 mi
-Formula: mi = km × 0.621371
+mi = km × 0.621371
 ```
 
 Contoh temperature:
 
 ```text
 1 °C = 33.8 °F
-Formula: °F = (°C × 9/5) + 32
+°F = (°C × 9/5) + 32
 ```
 
 Formula berasal dari converter result, bukan dihitung dari teks DOM. Saat target diganti atau conversion di-swap, formula ikut dibuat ulang sesuai arah conversion terbaru.
@@ -184,6 +222,8 @@ Contoh currency:
 ```text
 $900.00 ⇄ IDR 15,926,400.00
 ```
+
+Saat swap atau target diganti, result card mempertahankan posisi visualnya. Scroll atau resize tetap memakai selection anchor untuk repositioning.
 
 Untuk currency, reverse conversion menggunakan reciprocal dari rate aktif yang sama supaya round-trip tetap konsisten dan tidak drift karena precision reverse-rate.
 
@@ -250,6 +290,7 @@ result UI
 Main rules:
 
 - Parser hanya mengenali supported values dan aliases.
+- Unit ordering didefinisikan dari urutan unit config sehingga dropdown konsisten per kategori.
 - Conversion formulas tidak berada di DOM/content UI code.
 - Formula dikirim sebagai metadata dari converter result dan UI hanya menampilkannya.
 - Temperature conversion menggunakan Celsius sebagai intermediate base untuk `°C`, `°F`, `K`, dan `°R`.
@@ -329,8 +370,10 @@ Test suite mencakup:
 
 - selection parsing;
 - aliases dan invalid input;
-- length conversion;
-- weight conversion;
+- metric length ladder (`km → hm → dam → m → dm → cm → mm`);
+- metric weight ladder (`kg → hg → dag → g → dg → cg → mg`);
+- target dropdown ordering untuk length, weight, temperature, dan data;
+- imperial length/weight conversion;
 - temperature conversion untuk Celsius, Fahrenheit, Kelvin, dan Réaumur;
 - Réaumur parser aliases seperti `°R`, `R`, `°Ré`, `°Re`, `Reaumur`, dan `Reamur`;
 - Réaumur target availability di converter metadata;
