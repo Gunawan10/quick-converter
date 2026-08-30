@@ -106,7 +106,7 @@ test('8 bit to Byte', () => {
   );
 });
 
-test('measurement conversion returns rate and targets', async () => {
+test('measurement conversion returns rate, formula and targets', async () => {
   const result = await convert(
     {
       type: 'length',
@@ -123,6 +123,7 @@ test('measurement conversion returns rate and targets', async () => {
   assert.equal(result.toUnit, 'km');
   assertClose(result.convertedValue, 16.09344);
   assertClose(result.rate, 1.609344);
+  assert.equal(result.formula, 'km = mi × 1.609344');
   assert.ok(result.targets.some((target) => target.value === 'km'));
 });
 
@@ -141,7 +142,38 @@ test('temperature conversion exposes Reaumur as a target', async () => {
   assert.equal(result.success, true);
   assert.equal(result.toUnit, '°R');
   assertClose(result.convertedValue, 80);
+  assert.equal(result.formula, '°R = °C × 4/5');
   assert.ok(result.targets.some((target) => target.value === '°R'));
+});
+
+test('temperature formula follows conversion direction', async () => {
+  const result = await convert(
+    {
+      type: 'temperature',
+      value: 32,
+      unit: '°F'
+    },
+    {
+      targetUnit: '°C'
+    }
+  );
+
+  assert.equal(result.formula, '°C = (°F − 32) × 5/9');
+});
+
+test('data conversion returns multiplier formula', async () => {
+  const result = await convert(
+    {
+      type: 'data',
+      value: 5,
+      unit: 'GB'
+    },
+    {
+      targetUnit: 'MB'
+    }
+  );
+
+  assert.equal(result.formula, 'MB = GB × 1,000');
 });
 
 test('currency uses mocked exchange rate and preserves metadata', async () => {
@@ -163,6 +195,7 @@ test('currency uses mocked exchange rate and preserves metadata', async () => {
   assert.equal(result.rate, 16000);
   assert.equal(result.date, '2026-08-29');
   assert.equal(result.provider, 'Frankfurter');
+  assert.equal(result.formula, undefined);
   assert.ok(result.targets.some((target) => target.value === 'USD'));
   assert.ok(result.targets.some((target) => target.value === 'IDR'));
 });
