@@ -104,6 +104,7 @@
     if (data.success) {
       state.resultElement.dataset.conversionDate = data.date || '';
       state.resultElement.dataset.provider = data.provider || '';
+      state.resultElement.dataset.converterType = data.type || '';
     }
 
     state.resultElement.innerHTML = data.success
