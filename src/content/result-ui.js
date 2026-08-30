@@ -90,6 +90,8 @@
   }
 
   function showResult(data) {
+    const preservedPosition = getCurrentResultPosition();
+
     hideTrigger();
     hideResult();
 
@@ -116,7 +118,53 @@
     );
 
     bindResultEvents();
-    positionResult();
+
+    if (preservedPosition) {
+      restoreResultPosition(preservedPosition);
+    } else {
+      positionResult();
+    }
+  }
+
+  function getCurrentResultPosition() {
+    if (!state.resultElement?.isConnected) {
+      return null;
+    }
+
+    const rect = state.resultElement.getBoundingClientRect();
+
+    if (!Number.isFinite(rect.left) || !Number.isFinite(rect.top)) {
+      return null;
+    }
+
+    return {
+      left: rect.left,
+      top: rect.top
+    };
+  }
+
+  function restoreResultPosition(position) {
+    if (!state.resultElement) {
+      return;
+    }
+
+    const margin = 10;
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const width = state.resultElement.offsetWidth;
+    const height = state.resultElement.offsetHeight;
+
+    const left = Math.max(
+      margin,
+      Math.min(position.left, viewportWidth - width - margin)
+    );
+    const top = Math.max(
+      margin,
+      Math.min(position.top, viewportHeight - height - margin)
+    );
+
+    state.resultElement.style.left = `${left}px`;
+    state.resultElement.style.top = `${top}px`;
   }
 
   function hideResult() {
@@ -257,7 +305,7 @@
 
     if (data.type !== 'currency') {
       const formulaLine = data.formula
-        ? `<div class="qc-formula-line">Formula: ${escapeHtml(data.formula)}</div>`
+        ? `<div class="qc-formula-line">${escapeHtml(data.formula)}</div>`
         : '';
 
       return `
