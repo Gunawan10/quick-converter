@@ -54,6 +54,7 @@ function convertMeasurement(parsed, options) {
     result: `${formatNumber(convertedValue)} ${getUnitLabel(parsed.type, targetUnit)}`,
     convertedValue,
     rate,
+    formula: buildUnitFormula(parsed.type, parsed.unit, targetUnit, rate),
     targets: getUnitTargets(parsed.type)
   };
 }
@@ -103,6 +104,33 @@ async function convertCurrency(parsed, options) {
       label: `${code} — ${currency.name}`
     }))
   };
+}
+
+function buildUnitFormula(type, fromUnit, toUnit, rate) {
+  if (fromUnit === toUnit) {
+    return `${toUnit} = ${fromUnit}`;
+  }
+
+  if (type !== 'temperature') {
+    return `${toUnit} = ${fromUnit} × ${formatNumber(rate, 6)}`;
+  }
+
+  const formulas = {
+    '°C→°F': '°F = (°C × 9/5) + 32',
+    '°F→°C': '°C = (°F − 32) × 5/9',
+    '°C→K': 'K = °C + 273.15',
+    'K→°C': '°C = K − 273.15',
+    '°C→°R': '°R = °C × 4/5',
+    '°R→°C': '°C = °R × 5/4',
+    '°F→K': 'K = (°F − 32) × 5/9 + 273.15',
+    'K→°F': '°F = (K − 273.15) × 9/5 + 32',
+    '°F→°R': '°R = (°F − 32) × 4/9',
+    '°R→°F': '°F = °R × 9/4 + 32',
+    'K→°R': '°R = (K − 273.15) × 4/5',
+    '°R→K': 'K = °R × 5/4 + 273.15'
+  };
+
+  return formulas[`${fromUnit}→${toUnit}`] || '';
 }
 
 function getUnitTargets(type) {
