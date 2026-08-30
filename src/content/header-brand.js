@@ -4,7 +4,7 @@
   );
 
   const observer = new MutationObserver(() => {
-    enhanceHeader();
+    enhanceCard();
   });
 
   observe();
@@ -22,16 +22,26 @@
       subtree: true
     });
 
-    enhanceHeader();
+    enhanceCard();
   }
 
-  function enhanceHeader() {
+  function enhanceCard() {
     const card = document.getElementById('quick-converter-result');
-    const brand = card?.querySelector('.qc-brand');
+
+    if (!card) {
+      return;
+    }
+
+    enhanceHeader(card);
+    enhanceFooterPair(card);
+  }
+
+  function enhanceHeader(card) {
+    const brand = card.querySelector('.qc-brand');
     const title = brand?.querySelector('strong');
     const logo = brand?.querySelector('.qc-logo');
 
-    if (!card || !brand || !title) {
+    if (!brand || !title) {
       return;
     }
 
@@ -52,6 +62,38 @@
 
     title.parentNode.insertBefore(textWrap, title);
     textWrap.append(title, subtitle);
+  }
+
+  function enhanceFooterPair(card) {
+    if (card.querySelector('.qc-live-rate')) {
+      return;
+    }
+
+    const category = card.querySelector('.qc-category');
+    const pair = getUnitPair(card);
+
+    if (!category || !pair) {
+      return;
+    }
+
+    category.textContent = pair;
+    category.classList.add('qc-unit-pair');
+  }
+
+  function getUnitPair(card) {
+    const rateText = card
+      .querySelector('.qc-rate-line')
+      ?.textContent
+      ?.replace(/\s+/g, ' ')
+      ?.trim();
+
+    const match = rateText?.match(/^1\s+(.+?)\s+=\s+.+?\s+([^\s]+)$/);
+
+    if (!match) {
+      return '';
+    }
+
+    return `${match[1].trim()} → ${match[2].trim()}`;
   }
 
   function getConverterType(card) {
