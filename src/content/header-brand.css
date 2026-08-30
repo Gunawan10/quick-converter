@@ -49,3 +49,10 @@
   align-items: center;
   gap: 4px;
 }
+
+#quick-converter-result .qc-formula-line {
+  margin-top: 3px;
+  color: #7d869d;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
