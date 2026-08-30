@@ -1,4 +1,12 @@
 (() => {
+  const VALID_TYPES = new Set([
+    'currency',
+    'length',
+    'weight',
+    'temperature',
+    'data'
+  ]);
+
   const observer = new MutationObserver(() => {
     applyTheme();
   });
@@ -17,6 +25,12 @@
       return;
     }
 
+    const currentType = card.dataset.converterType;
+
+    if (VALID_TYPES.has(currentType)) {
+      return;
+    }
+
     const type = getConverterType(card);
 
     if (type) {
@@ -29,10 +43,12 @@
       return 'currency';
     }
 
-    return card
+    const category = card
       .querySelector('.qc-category')
       ?.textContent
       ?.trim()
-      ?.toLowerCase() || null;
+      ?.toLowerCase();
+
+    return VALID_TYPES.has(category) ? category : null;
   }
 })();
