@@ -43,7 +43,7 @@ function convertTemperature(value, from, to) {
     return celsius + 273.15;
   }
 
-  if (to === '°Ré') {
+  if (to === '°R') {
     return celsius * 4 / 5;
   }
 
@@ -63,7 +63,7 @@ function toCelsius(value, unit) {
     return value - 273.15;
   }
 
-  if (unit === '°Ré') {
+  if (unit === '°R') {
     return value * 5 / 4;
   }
 
