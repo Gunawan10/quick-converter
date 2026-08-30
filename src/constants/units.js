@@ -3,14 +3,17 @@ export const UNIT_TYPES = {
     label: 'Length',
     defaultTarget: 'km',
     units: {
-      mm: unit('mm', 'Millimeter', ['mm', 'millimeter', 'millimeters', 'millimetre', 'millimetres'], 0.001),
-      cm: unit('cm', 'Centimeter', ['cm', 'centimeter', 'centimeters', 'centimetre', 'centimetres'], 0.01),
-      m: unit('m', 'Meter', ['m', 'meter', 'meters', 'metre', 'metres'], 1),
       km: unit('km', 'Kilometer', ['km', 'kilometer', 'kilometers', 'kilometre', 'kilometres'], 1000),
-      in: unit('in', 'Inch', ['in', 'inch', 'inches'], 0.0254),
-      ft: unit('ft', 'Foot', ['ft', 'foot', 'feet'], 0.3048),
+      hm: unit('hm', 'Hectometer', ['hm', 'hectometer', 'hectometers', 'hectometre', 'hectometres'], 100),
+      dam: unit('dam', 'Decameter', ['dam', 'dkm', 'decameter', 'decameters', 'decametre', 'decametres', 'dekameter', 'dekameters'], 10),
+      m: unit('m', 'Meter', ['m', 'meter', 'meters', 'metre', 'metres'], 1),
+      dm: unit('dm', 'Decimeter', ['dm', 'decimeter', 'decimeters', 'decimetre', 'decimetres'], 0.1),
+      cm: unit('cm', 'Centimeter', ['cm', 'centimeter', 'centimeters', 'centimetre', 'centimetres'], 0.01),
+      mm: unit('mm', 'Millimeter', ['mm', 'millimeter', 'millimeters', 'millimetre', 'millimetres'], 0.001),
+      mi: unit('mi', 'Mile', ['mi', 'mile', 'miles'], 1609.344),
       yd: unit('yd', 'Yard', ['yd', 'yard', 'yards'], 0.9144),
-      mi: unit('mi', 'Mile', ['mi', 'mile', 'miles'], 1609.344)
+      ft: unit('ft', 'Foot', ['ft', 'foot', 'feet'], 0.3048),
+      in: unit('in', 'Inch', ['in', 'inch', 'inches'], 0.0254)
     }
   },
 
@@ -18,12 +21,16 @@ export const UNIT_TYPES = {
     label: 'Weight',
     defaultTarget: 'kg',
     units: {
-      mg: unit('mg', 'Milligram', ['mg', 'milligram', 'milligrams'], 0.000001),
-      g: unit('g', 'Gram', ['g', 'gram', 'grams'], 0.001),
+      ton: unit('ton', 'Ton', ['ton', 'tons', 'tonne', 'tonnes'], 1000),
       kg: unit('kg', 'Kilogram', ['kg', 'kilogram', 'kilograms', 'kilo', 'kilos'], 1),
-      oz: unit('oz', 'Ounce', ['oz', 'ounce', 'ounces'], 0.028349523125),
+      hg: unit('hg', 'Hectogram', ['hg', 'hectogram', 'hectograms'], 0.1),
+      dag: unit('dag', 'Decagram', ['dag', 'decagram', 'decagrams', 'dekagram', 'dekagrams'], 0.01),
+      g: unit('g', 'Gram', ['g', 'gram', 'grams'], 0.001),
+      dg: unit('dg', 'Decigram', ['dg', 'decigram', 'decigrams'], 0.0001),
+      cg: unit('cg', 'Centigram', ['cg', 'centigram', 'centigrams'], 0.00001),
+      mg: unit('mg', 'Milligram', ['mg', 'milligram', 'milligrams'], 0.000001),
       lb: unit('lb', 'Pound', ['lb', 'lbs', 'pound', 'pounds'], 0.45359237),
-      ton: unit('ton', 'Ton', ['ton', 'tons', 'tonne', 'tonnes'], 1000)
+      oz: unit('oz', 'Ounce', ['oz', 'ounce', 'ounces'], 0.028349523125)
     }
   },
 
@@ -42,12 +49,12 @@ export const UNIT_TYPES = {
     label: 'Data',
     defaultTarget: 'MB',
     units: {
-      bit: dataUnit('bit', 'Bit', ['bit', 'bits'], 0.125),
-      Byte: dataUnit('Byte', 'Byte', ['byte', 'bytes', 'b'], 1),
-      KB: dataUnit('KB', 'Kilobyte', ['kb', 'kilobyte', 'kilobytes'], 1000),
-      MB: dataUnit('MB', 'Megabyte', ['mb', 'megabyte', 'megabytes'], 1000000),
+      TB: dataUnit('TB', 'Terabyte', ['tb', 'terabyte', 'terabytes'], 1000000000000),
       GB: dataUnit('GB', 'Gigabyte', ['gb', 'gigabyte', 'gigabytes'], 1000000000),
-      TB: dataUnit('TB', 'Terabyte', ['tb', 'terabyte', 'terabytes'], 1000000000000)
+      MB: dataUnit('MB', 'Megabyte', ['mb', 'megabyte', 'megabytes'], 1000000),
+      KB: dataUnit('KB', 'Kilobyte', ['kb', 'kilobyte', 'kilobytes'], 1000),
+      Byte: dataUnit('Byte', 'Byte', ['byte', 'bytes', 'b'], 1),
+      bit: dataUnit('bit', 'Bit', ['bit', 'bits'], 0.125)
     }
   }
 };
