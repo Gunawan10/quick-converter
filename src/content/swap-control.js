@@ -131,17 +131,31 @@
   }
 
   function getConverterType(card) {
+    const type = card.dataset.converterType?.trim()?.toLowerCase();
+
+    if (type) {
+      return type;
+    }
+
     if (card.querySelector('.qc-live-rate')) {
       return 'currency';
     }
 
-    const category = card
-      .querySelector('.qc-category')
+    const subtitle = card
+      .querySelector('.qc-brand-subtitle')
       ?.textContent
       ?.trim()
       ?.toLowerCase();
 
-    return category || null;
+    const supportedTypes = new Set([
+      'currency',
+      'length',
+      'weight',
+      'temperature',
+      'data'
+    ]);
+
+    return supportedTypes.has(subtitle) ? subtitle : null;
   }
 
   function parseRateNumber(text) {
