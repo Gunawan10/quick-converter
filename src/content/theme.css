@@ -376,21 +376,27 @@
 }
 
 #quick-converter-trigger {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   border: 1px solid #d7d4ff;
-  background: linear-gradient(145deg, #ffffff, #f0efff);
+  border-radius: 8px;
+  background: #ffffff;
   box-shadow:
-    0 10px 26px rgba(98, 87, 246, 0.2),
-    0 3px 8px rgba(15, 23, 42, 0.08);
+    0 5px 14px rgba(98, 87, 246, 0.16),
+    0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+#quick-converter-trigger img {
+  width: 18px;
+  height: 18px;
 }
 
 #quick-converter-trigger:hover {
   border-color: #aaa3ff;
-  background: #f5f3ff;
+  background: #f8f7ff;
   box-shadow:
-    0 12px 30px rgba(98, 87, 246, 0.24),
-    0 4px 10px rgba(15, 23, 42, 0.1);
+    0 7px 16px rgba(98, 87, 246, 0.18),
+    0 2px 5px rgba(15, 23, 42, 0.08);
 }
 
 @media (max-width: 380px) {
