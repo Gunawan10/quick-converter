@@ -71,6 +71,27 @@ test('100 C to F', () => {
   );
 });
 
+test('100 C to Reaumur', () => {
+  assertClose(
+    convertUnit('temperature', 100, '°C', '°Ré'),
+    80
+  );
+});
+
+test('80 Reaumur to C', () => {
+  assertClose(
+    convertUnit('temperature', 80, '°Ré', '°C'),
+    100
+  );
+});
+
+test('80 Reaumur to F', () => {
+  assertClose(
+    convertUnit('temperature', 80, '°Ré', '°F'),
+    212
+  );
+});
+
 test('5 GB to MB', () => {
   assertClose(
     convertUnit('data', 5, 'GB', 'MB'),
@@ -103,6 +124,24 @@ test('measurement conversion returns rate and targets', async () => {
   assertClose(result.convertedValue, 16.09344);
   assertClose(result.rate, 1.609344);
   assert.ok(result.targets.some((target) => target.value === 'km'));
+});
+
+test('temperature conversion exposes Reaumur as a target', async () => {
+  const result = await convert(
+    {
+      type: 'temperature',
+      value: 100,
+      unit: '°C'
+    },
+    {
+      targetUnit: '°Ré'
+    }
+  );
+
+  assert.equal(result.success, true);
+  assert.equal(result.toUnit, '°Ré');
+  assertClose(result.convertedValue, 80);
+  assert.ok(result.targets.some((target) => target.value === '°Ré'));
 });
 
 test('currency uses mocked exchange rate and preserves metadata', async () => {
