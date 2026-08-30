@@ -70,6 +70,7 @@
   function enhanceMetadata(card) {
     const rateLine = card.querySelector('.qc-rate-line');
     const providerLine = card.querySelector('.qc-provider-line');
+    const formulaLine = card.querySelector('.qc-formula-line');
 
     if (rateLine && !rateLine.querySelector('.qc-meta-icon')) {
       rateLine.insertAdjacentHTML(
@@ -82,6 +83,13 @@
       providerLine.insertAdjacentHTML(
         'afterbegin',
         `<span class="qc-meta-icon" aria-hidden="true">${providerIcon()}</span>`
+      );
+    }
+
+    if (formulaLine && !formulaLine.querySelector('.qc-meta-icon')) {
+      formulaLine.insertAdjacentHTML(
+        'afterbegin',
+        `<span class="qc-meta-icon" aria-hidden="true">${formulaIcon()}</span>`
       );
     }
   }
@@ -141,6 +149,16 @@
         <ellipse cx="10" cy="5" rx="5.5" ry="2.5" stroke="currentColor" stroke-width="1.4"/>
         <path d="M4.5 5v5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V5" stroke="currentColor" stroke-width="1.4"/>
         <path d="M4.5 10v5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-5" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+    `;
+  }
+
+  function formulaIcon() {
+    return `
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M7.2 15.5 10 4.5h3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M5.5 9.2h6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="m13.5 10 3 3m0-3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
     `;
   }
