@@ -426,3 +426,7 @@ Main design rules:
 Quick Converter currently focuses on fast conversions directly from selected webpage text using a compact floating result card.
 
 Additional converter types can be added later using the same parser → converter → result UI architecture.
+
+## License
+
+Licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
