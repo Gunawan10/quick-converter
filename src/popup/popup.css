@@ -74,6 +74,7 @@ input {
 .settings-section {
   padding: 14px 18px;
   border-bottom: 1px solid #eceef5;
+  transition: opacity .18s ease, filter .18s ease;
 }
 
 .section-heading {
@@ -272,6 +273,34 @@ select:focus-visible {
 .display-select select {
   width: 150px;
   justify-self: end;
+}
+
+.settings-card.is-disabled .settings-section {
+  opacity: .42;
+  filter: saturate(.35);
+}
+
+.settings-card.is-disabled .settings-section label,
+.settings-card.is-disabled .settings-section select,
+.settings-card.is-disabled .converter-option {
+  cursor: not-allowed;
+}
+
+.settings-card.is-disabled .converter-option:hover {
+  background: #f7f6ff;
+}
+
+.settings-card.is-disabled select {
+  color: #8d94a8;
+  background: #f3f4f7;
+}
+
+.settings-card.is-disabled .switch {
+  background: #d8dbe4;
+}
+
+.settings-card.is-disabled .switch-input:checked + .switch {
+  background: #c8cbd5;
 }
 
 .popup-footer {
