@@ -1,1 +1,149 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Quick Converter</title><link rel="stylesheet" href="popup.css"></head><body><main><h1>Quick Converter</h1><p>Default currency</p><select id="targetCurrency"></select><button id="saveButton">Save</button><button id="optionsButton" class="secondary">Options</button><div id="status"></div></main><script type="module" src="popup.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quick Converter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="settings-card">
+    <header class="brand-header">
+      <img class="brand-icon" src="../../assets/icons/icon48.png" alt="Quick Converter">
+      <div>
+        <h1>Quick Converter</h1>
+        <p>Convert anything, instantly</p>
+      </div>
+    </header>
+
+    <section class="settings-section">
+      <div class="section-heading">
+        <h2>General</h2>
+      </div>
+
+      <label class="setting-row toggle-row">
+        <span>
+          <strong>Show selection icon</strong>
+          <small>Display the converter icon when text is selected.</small>
+        </span>
+        <input id="showSelectionIcon" class="switch-input" type="checkbox">
+        <span class="switch" aria-hidden="true"></span>
+      </label>
+
+      <label class="setting-row toggle-row">
+        <span>
+          <strong>Copy result when clicked</strong>
+          <small>Automatically copy the converted result to clipboard.</small>
+        </span>
+        <input id="copyResultOnClick" class="switch-input" type="checkbox">
+        <span class="switch" aria-hidden="true"></span>
+      </label>
+    </section>
+
+    <section class="settings-section">
+      <div class="section-heading">
+        <h2>Enabled Converters</h2>
+        <p>Choose which converters are available.</p>
+      </div>
+
+      <div class="converter-grid">
+        <label class="converter-option">
+          <input type="checkbox" data-converter="currency">
+          <span class="checkmark">✓</span>
+          <span class="converter-symbol">$</span>
+          <span>Currency</span>
+        </label>
+        <label class="converter-option">
+          <input type="checkbox" data-converter="length">
+          <span class="checkmark">✓</span>
+          <span class="converter-symbol">↔</span>
+          <span>Length</span>
+        </label>
+        <label class="converter-option">
+          <input type="checkbox" data-converter="weight">
+          <span class="checkmark">✓</span>
+          <span class="converter-symbol">⚖</span>
+          <span>Weight</span>
+        </label>
+        <label class="converter-option">
+          <input type="checkbox" data-converter="temperature">
+          <span class="checkmark">✓</span>
+          <span class="converter-symbol">°</span>
+          <span>Temperature</span>
+        </label>
+        <label class="converter-option">
+          <input type="checkbox" data-converter="data">
+          <span class="checkmark">✓</span>
+          <span class="converter-symbol">B</span>
+          <span>Data</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <div class="section-heading">
+        <h2>Default Target Units</h2>
+        <p>Set your preferred target for each converter.</p>
+      </div>
+
+      <div class="select-list">
+        <label class="select-row">
+          <span>Currency</span>
+          <select id="targetCurrency"></select>
+        </label>
+        <label class="select-row">
+          <span>Length</span>
+          <select id="targetLength"></select>
+        </label>
+        <label class="select-row">
+          <span>Weight</span>
+          <select id="targetWeight"></select>
+        </label>
+        <label class="select-row">
+          <span>Temperature</span>
+          <select id="targetTemperature"></select>
+        </label>
+        <label class="select-row">
+          <span>Data</span>
+          <select id="targetData"></select>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <div class="section-heading">
+        <h2>Display</h2>
+      </div>
+
+      <label class="setting-row toggle-row">
+        <span>
+          <strong>Show provider & updated time</strong>
+          <small>Display provider details in currency result cards.</small>
+        </span>
+        <input id="showProviderMeta" class="switch-input" type="checkbox">
+        <span class="switch" aria-hidden="true"></span>
+      </label>
+
+      <label class="select-row display-select">
+        <span>
+          <strong>Number format</strong>
+          <small>Choose how numbers are formatted.</small>
+        </span>
+        <select id="numberFormat">
+          <option value="auto">Auto (Locale)</option>
+          <option value="us">1,234.56</option>
+          <option value="eu">1.234,56</option>
+          <option value="plain">1234.56</option>
+        </select>
+      </label>
+    </section>
+
+    <footer class="popup-footer">
+      <span id="version">v1.0.0</span>
+      <span>By Snowman Labs</span>
+    </footer>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
