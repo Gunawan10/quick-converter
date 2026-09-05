@@ -34,7 +34,8 @@
         "src/content/swap-control.css",
         "src/content/theme.css",
         "src/content/stacked-side-layout.css",
-        "src/content/header-brand.css"
+        "src/content/header-brand.css",
+        "src/content/dark-theme.css"
       ],
       "js": [
         "src/content/result-ui.js",
