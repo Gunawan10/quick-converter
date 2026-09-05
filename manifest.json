@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Quick Converter",
   "version": "1.0.0",
-  "description": "Convert selected values directly from webpages.",
+  "description": "Convert currency and units instantly",
   "permissions": [
     "contextMenus",
     "storage"
