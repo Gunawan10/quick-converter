@@ -22,6 +22,22 @@ chrome.runtime.onStartup.addListener(() => {
   queueContextMenuOperation(rebuildContextMenu);
 });
 
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local' || !changes.extensionEnabled) {
+    return;
+  }
+
+  queueContextMenuOperation(async () => {
+    try {
+      await updateContextMenuEnabled(
+        changes.extensionEnabled.newValue !== false
+      );
+    } catch {
+      await rebuildContextMenu();
+    }
+  });
+});
+
 chrome.runtime.onMessage.addListener(
   (message, sender, sendResponse) => {
     if (message.type === 'INITIALIZE_LOCALE') {
@@ -32,12 +48,16 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === 'DETECT_SELECTION') {
-      const detection = detectSelection(message.text);
+      detectSelectionWhenEnabled(message.text)
+        .then((detection) => {
+          if (detection.recognized) {
+            updateContextMenuForSelection(message.text);
+          }
 
-      updateContextMenuForSelection(message.text);
-      sendResponse(detection);
+          sendResponse(detection);
+        });
 
-      return false;
+      return true;
     }
 
     if (message.type === 'CONVERT_SELECTION') {
@@ -111,6 +131,13 @@ function queueContextMenuOperation(operation) {
   return contextMenuOperation;
 }
 
+async function isExtensionEnabled() {
+  const { extensionEnabled = true } =
+    await chrome.storage.local.get('extensionEnabled');
+
+  return extensionEnabled !== false;
+}
+
 async function getTargetCurrency(locale) {
   const {
     targetCurrency,
@@ -135,29 +162,33 @@ async function getTargetCurrency(locale) {
 async function initializeSettings(reason) {
   const {
     targetCurrency,
-    currencyPreferenceSet
+    currencyPreferenceSet,
+    extensionEnabled
   } = await chrome.storage.local.get([
     'targetCurrency',
-    'currencyPreferenceSet'
+    'currencyPreferenceSet',
+    'extensionEnabled'
   ]);
 
-  if (reason === 'install' && !targetCurrency) {
-    await chrome.storage.local.set({
-      targetCurrency: DEFAULT_CURRENCY,
-      currencyPreferenceSet: false
-    });
+  const updates = {};
 
-    return;
+  if (typeof extensionEnabled === 'undefined') {
+    updates.extensionEnabled = true;
   }
 
-  if (
+  if (reason === 'install' && !targetCurrency) {
+    updates.targetCurrency = DEFAULT_CURRENCY;
+    updates.currencyPreferenceSet = false;
+  } else if (
     reason === 'update' &&
     targetCurrency &&
     typeof currencyPreferenceSet === 'undefined'
   ) {
-    await chrome.storage.local.set({
-      currencyPreferenceSet: false
-    });
+    updates.currencyPreferenceSet = false;
+  }
+
+  if (Object.keys(updates).length) {
+    await chrome.storage.local.set(updates);
   }
 }
 
@@ -169,16 +200,33 @@ function removeContextMenus() {
 
 async function rebuildContextMenu() {
   await removeContextMenus();
+  const enabled = await isExtensionEnabled();
 
   await new Promise((resolve) => {
     chrome.contextMenus.create(
       {
         id: MENU_ID,
         title: 'Quick Convert',
-        contexts: ['selection']
+        contexts: ['selection'],
+        enabled
       },
       () => resolve()
     );
+  });
+}
+
+function updateContextMenuEnabled(enabled) {
+  return new Promise((resolve, reject) => {
+    chrome.contextMenus.update(MENU_ID, { enabled }, () => {
+      const error = chrome.runtime.lastError;
+
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
   });
 }
 
@@ -214,6 +262,14 @@ async function initializeLocale(locale) {
   });
 }
 
+async function detectSelectionWhenEnabled(text) {
+  if (!await isExtensionEnabled()) {
+    return { recognized: false, disabled: true };
+  }
+
+  return detectSelection(text);
+}
+
 function detectSelection(text) {
   const parsed = parseSelection(text);
 
@@ -229,6 +285,14 @@ function detectSelection(text) {
 }
 
 async function handleConversion(text, locale) {
+  if (!await isExtensionEnabled()) {
+    return {
+      success: false,
+      ignored: true,
+      disabled: true
+    };
+  }
+
   const parsed = parseSelection(text);
 
   if (!parsed) {
@@ -253,6 +317,10 @@ async function handleConversion(text, locale) {
 }
 
 async function changeTarget(message) {
+  if (!await isExtensionEnabled()) {
+    return { success: false, ignored: true, disabled: true };
+  }
+
   const {
     converterType,
     value,
@@ -276,6 +344,10 @@ async function changeTarget(message) {
 }
 
 async function swapConversion(message) {
+  if (!await isExtensionEnabled()) {
+    return { success: false, ignored: true, disabled: true };
+  }
+
   const {
     converterType,
     value,
