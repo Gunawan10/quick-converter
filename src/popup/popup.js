@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const elements = {
+  settingsCard: document.querySelector('.settings-card'),
   extensionEnabled: document.querySelector('#extensionEnabled'),
   showSelectionIcon: document.querySelector('#showSelectionIcon'),
   copyResultOnClick: document.querySelector('#copyResultOnClick'),
@@ -42,6 +43,19 @@ const elements = {
 
 const converterInputs = [
   ...document.querySelectorAll('[data-converter]')
+];
+
+const secondaryControls = [
+  elements.showSelectionIcon,
+  elements.copyResultOnClick,
+  elements.targetCurrency,
+  elements.targetLength,
+  elements.targetWeight,
+  elements.targetTemperature,
+  elements.targetData,
+  elements.showProviderMeta,
+  elements.numberFormat,
+  ...converterInputs
 ];
 
 populateCurrencyOptions();
@@ -113,11 +127,15 @@ async function loadSettings() {
   for (const input of converterInputs) {
     input.checked = settings.enabledConverters[input.dataset.converter] !== false;
   }
+
+  applyExtensionState(elements.extensionEnabled.checked);
 }
 
 function bindEvents() {
-  elements.extensionEnabled.addEventListener('change', () => {
-    saveSetting('extensionEnabled', elements.extensionEnabled.checked);
+  elements.extensionEnabled.addEventListener('change', async () => {
+    const enabled = elements.extensionEnabled.checked;
+    applyExtensionState(enabled);
+    await saveSetting('extensionEnabled', enabled);
   });
 
   elements.showSelectionIcon.addEventListener('change', () => {
@@ -175,6 +193,14 @@ function bindEvents() {
         }
       });
     });
+  }
+}
+
+function applyExtensionState(enabled) {
+  elements.settingsCard.classList.toggle('is-disabled', !enabled);
+
+  for (const control of secondaryControls) {
+    control.disabled = !enabled;
   }
 }
 
