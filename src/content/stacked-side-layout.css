@@ -39,7 +39,7 @@
   margin: 0;
   border: 1px solid var(--qc-accent-border, #d8d4ff);
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--qc-swap-bg, #ffffff);
   color: var(--qc-accent, #6257f6);
   box-shadow:
     0 8px 20px rgba(98, 87, 246, 0.16),
@@ -48,7 +48,7 @@
 
 #quick-converter-result .qc-main.qc-main--stacked .qc-swap:hover {
   border-color: var(--qc-accent, #6257f6);
-  background: var(--qc-accent-soft, #f0efff);
+  background: var(--qc-swap-hover-bg, var(--qc-accent-soft, #f0efff));
   color: var(--qc-accent-strong, #5146e5);
 }
 
