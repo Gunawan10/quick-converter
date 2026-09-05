@@ -1,0 +1,67 @@
+body[data-theme="dark"] {
+  background: #000000;
+  color: #f7f7fb;
+}
+
+body[data-theme="dark"] .settings-card {
+  background: #000000;
+}
+
+body[data-theme="dark"] .brand-header,
+body[data-theme="dark"] .settings-section,
+body[data-theme="dark"] .display-select + .display-select {
+  border-color: #242424;
+}
+
+body[data-theme="dark"] .setting-row + .setting-row {
+  border-color: #202020;
+}
+
+body[data-theme="dark"] .brand-header p,
+body[data-theme="dark"] .section-heading p,
+body[data-theme="dark"] .setting-row small,
+body[data-theme="dark"] .display-select small,
+body[data-theme="dark"] .popup-footer {
+  color: #9a9aa3;
+}
+
+body[data-theme="dark"] .converter-option {
+  background: #101010;
+  color: #f2f2f6;
+}
+
+body[data-theme="dark"] .converter-option:hover {
+  background: #181818;
+}
+
+body[data-theme="dark"] .converter-symbol {
+  background: #1a1a1a;
+}
+
+body[data-theme="dark"] .checkmark {
+  background: #0b0b0b;
+  border-color: #343434;
+}
+
+body[data-theme="dark"] select {
+  color: #f4f4f7;
+  background: #141414;
+}
+
+body[data-theme="dark"] select option {
+  color: #f4f4f7;
+  background: #0b0b0b;
+}
+
+body[data-theme="dark"] .switch {
+  background: #343434;
+}
+
+body[data-theme="dark"] .settings-card.is-disabled select {
+  color: #77777f;
+  background: #101010;
+}
+
+body[data-theme="dark"] .settings-card.is-disabled .converter-option:hover {
+  background: #101010;
+}
