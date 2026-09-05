@@ -1,7 +1,7 @@
 export const UNIT_TYPES = {
   length: {
     label: 'Length',
-    defaultTarget: 'km',
+    defaultTarget: 'm',
     units: {
       km: unit('km', 'Kilometer', ['km', 'kilometer', 'kilometers', 'kilometre', 'kilometres'], 1000),
       hm: unit('hm', 'Hectometer', ['hm', 'hectometer', 'hectometers', 'hectometre', 'hectometres'], 100),
