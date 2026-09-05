@@ -1,5 +1,19 @@
 #quick-converter-result .qc-main:not(.qc-main--stacked) {
-  grid-template-columns: max-content 42px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+}
+
+#quick-converter-result .qc-main:not(.qc-main--stacked) .qc-value-block {
+  min-width: 0;
+}
+
+#quick-converter-result .qc-main:not(.qc-main--stacked) .qc-value-block--source {
+  align-items: flex-start;
+  text-align: left;
+}
+
+#quick-converter-result .qc-main:not(.qc-main--stacked) .qc-value-block--result {
+  align-items: flex-end;
+  text-align: right;
 }
 
 #quick-converter-result .qc-main:not(.qc-main--stacked).qc-main--compact-values .qc-main-value {
