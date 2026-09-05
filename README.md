@@ -1,8 +1,8 @@
 # Quick Converter
 
-Quick Converter is a Chrome extension that converts currencies and common units directly from text selected on a webpage.
+Quick Converter is a lightweight Chrome extension for converting currencies and common units directly from text selected on a webpage.
 
-Its main flow is intentionally simple:
+Select a supported value, click the Quick Converter icon, then view the result, change the target, swap direction, or copy the converted value without leaving the page.
 
 ```text
 select text → click Quick Converter icon → view result → change target / swap / copy
@@ -10,21 +10,50 @@ select text → click Quick Converter icon → view result → change target / s
 
 ## Features
 
-- **Instant selection conversion** — select a supported value on any webpage, then click the Quick Converter icon near the selection.
-- **Multiple converter types** — supports currency, length, weight, temperature, and data size.
-- **Smart detection** — recognizes values such as `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°R`, and `100 MB`.
-- **Quick target switching** — change the target currency or unit directly from the result card.
-- **Reverse conversion** — swap source and target without selecting the text again.
-- **Adaptive result card** — short values stay horizontal; values that do not fit automatically switch to a vertical layout.
-- **Conversion metadata** — unit conversions show the active rate/formula, while currency conversions show exchange-rate information.
-- **Live currency rates** — uses Frankfurter for exchange rates and shows provider and last-updated information.
-- **Copy result** — copy the converted result directly from the card.
-- **Context menu support** — conversions can also be triggered from the `Quick Convert` context-menu item.
-- **Dark mode** — supports System, Light, and Dark themes.
-- **Configurable defaults** — choose preferred target units and currency from the popup settings.
-- **Global enable/disable** — disable Quick Converter without uninstalling it.
+- Converts selected values directly on webpages.
+- Supports currency, length, weight, temperature, and data size.
+- Detects formats such as `$100`, `100 USD`, `10 km`, `5 pounds`, `72°F`, `80°R`, and `100 MB`.
+- Small trigger icon appears near supported selections.
+- Change the target currency or unit directly from the result card.
+- Swap source and target without selecting the text again.
+- Adaptive result card:
+  - short values stay horizontal
+  - long values automatically switch to a vertical layout
+- Unit conversions show active rate and formula metadata.
+- Currency conversions show exchange-rate, provider, and last-updated information.
+- Copy the converted result directly from the card.
+- Context-menu support through `Quick Convert`.
+- Configurable default target currency and units.
+- Enable or disable individual converter types.
+- Light, dark, or system theme.
+- Extension can be enabled or disabled from popup settings.
+- Settings become inactive while the extension is disabled.
+- Settings persist using `chrome.storage.local`.
 
-## Supported converters
+## How It Works
+
+1. Select a supported value on a webpage.
+2. Quick Converter detects the value type.
+3. A small trigger icon appears near the selection.
+4. Click the icon to open the floating result card.
+5. Change the target, swap direction, or copy the result.
+
+Example inputs:
+
+```text
+10 miles
+2 hm
+5 dag
+72°F
+80°R
+5 GB
+$100
+100 USD
+```
+
+Unsupported selections are ignored without interfering with the webpage.
+
+## Supported Converters
 
 ### Length
 
@@ -120,30 +149,7 @@ Exchange-rate provider: **Frankfurter**.
 
 The default target currency follows the saved preference when available. Otherwise, Quick Converter uses the browser locale/region and falls back to `IDR`.
 
-## How it works
-
-1. Select a supported value on a webpage.
-2. Quick Converter detects the value type.
-3. A small trigger icon appears near the selection.
-4. Click the icon to open the floating result card.
-5. Change the target, swap direction, or copy the result directly from the card.
-
-Example inputs:
-
-```text
-10 miles
-2 hm
-5 dag
-72°F
-80°R
-5 GB
-$100
-100 USD
-```
-
-Unsupported selections are ignored without interfering with the webpage.
-
-## Adaptive result card
+## Adaptive Result Card
 
 Quick Converter automatically chooses the best layout based on the rendered value size.
 
@@ -153,7 +159,7 @@ Short values stay horizontal:
 10 mi   ⇄   16.09344 km
 ```
 
-If either side no longer fits cleanly, the result card switches to a vertical layout instead of truncating the value:
+If either side no longer fits cleanly, the card switches to a vertical layout instead of truncating the value:
 
 ```text
 FROM
@@ -165,9 +171,11 @@ TO
 IDR 15,926,400.00
 ```
 
-The horizontal layout keeps the swap button compact without separator lines. The vertical layout places the swap button in the center with a horizontal divider.
+The horizontal layout keeps the swap button compact without separator lines. The vertical layout places the swap button in the center with a divider.
 
-## Unit rate and formula
+## Conversion Metadata
+
+### Unit Rate and Formula
 
 Unit conversions include the active conversion rate and formula.
 
@@ -187,7 +195,7 @@ Temperature example:
 
 Formulas are generated by the converter layer and sent to the UI as result metadata.
 
-## Currency rates
+### Currency Rates
 
 Currency conversion uses Frankfurter.
 
@@ -204,7 +212,7 @@ Raw numeric rates are used for calculations. Formatted values are display-only s
 
 ## Settings
 
-The popup includes:
+Quick Converter includes a compact popup for controlling extension behavior.
 
 ### General
 
@@ -232,20 +240,58 @@ Choose the initial target for:
 - Temperature
 - Data
 
-These settings are also used by the result card when a conversion is opened for the first time.
+These preferences are used when the result card opens for the first time.
 
 ### Display
 
 - Show provider and updated time
-- Theme: `System`, `Light`, or `Dark`
+- Theme: System / Light / Dark
 - Number format
 
-## Build
+The main toggle can disable Quick Converter completely. When disabled, selection conversion is inactive and popup settings are visually dimmed and locked until the extension is enabled again.
+
+## Privacy
+
+Quick Converter is designed to keep unit conversion local and limit external requests to currency-rate lookups.
+
+- No account required.
+- No backend server operated by Quick Converter.
+- No AI processing.
+- Length, weight, temperature, and data conversions run locally in the browser.
+- Currency rates are requested from the Frankfurter API.
+- Quick Converter does not send the selected webpage text to a custom backend.
+- Settings and cached rates are stored locally using `chrome.storage.local`.
+
+## Tech Stack
+
+- Chrome Extension Manifest V3
+- JavaScript
+- HTML
+- CSS
+- `chrome.storage.local`
+- `MutationObserver`
+- Chrome Context Menus API
+- Frankfurter exchange-rate API
+- Node.js build script
+
+## Development
+
+Requirements:
+
+- Node.js
+- npm
+- Chromium-based browser such as Google Chrome
 
 Install dependencies:
 
 ```bash
 npm install
+```
+
+Run tests:
+
+```bash
+npm test
 ```
 
 Build the extension:
@@ -254,20 +300,15 @@ Build the extension:
 npm run build
 ```
 
-The build script creates a clean `dist/` directory containing the unpacked Chrome extension:
+Build output is generated in:
 
 ```text
 dist/
-├── manifest.json
-├── assets/
-└── src/
 ```
 
-The build step removes the previous `dist/` directory first and copies only the files required by the extension.
+The build process removes the previous `dist/` directory and copies only the files required by the extension.
 
-## Installation in Chrome
-
-### Using the build output
+## Load Extension Locally
 
 1. Run:
 
@@ -276,36 +317,18 @@ The build step removes the previous `dist/` directory first and copies only the 
    npm run build
    ```
 
-2. Open:
-
-   ```text
-   chrome://extensions
-   ```
-
+2. Open `chrome://extensions`.
 3. Enable **Developer mode**.
 4. Click **Load unpacked**.
-5. Select the `dist/` directory.
+5. Select the generated `dist/` directory.
 
-After changing the source code, run `npm run build` again and reload the extension from `chrome://extensions`.
-
-## Development
-
-Quick Converter uses plain JavaScript and Chrome Manifest V3.
-
-Useful commands:
+After making code changes, rebuild and reload the extension:
 
 ```bash
-npm test
 npm run build
 ```
 
 ## Tests
-
-Run the test suite with:
-
-```bash
-npm test
-```
 
 The test suite covers:
 
@@ -374,53 +397,31 @@ Main design rules:
 - Raw numeric values are used for calculations; formatted strings are display-only.
 - Popup preferences are stored in `chrome.storage.local` and shared with the conversion flow.
 
-## Project structure
+## Project Structure
 
 ```text
-manifest.json
-package.json
-scripts/
-  build.mjs
-assets/
-  icons/
-src/
-  background/
-    service-worker.js
-  constants/
-    currencies.js
-    units.js
-  content/
-    content.js
-    runtime.js
-    selection.js
-    result-ui.js
-    content.css
-    adaptive-layout.js
-    adaptive-layout.css
-    stacked-side-layout.css
-    swap-control.js
-    swap-control.css
-    mockup-layout.js
-    theme-control.js
-    theme.css
-    dark-theme.css
-    header-brand.js
-    header-brand.css
-    positioning-control.js
-  services/
-    converter.js
-    exchange-rate.js
-    unit-converter.js
-  utils/
-    formatter.js
-    number-parser.js
-    selection-parser.js
-  popup/
-  options/
-tests/
+.
+├── manifest.json
+├── package.json
+├── scripts/
+│   └── build.mjs
+├── assets/
+│   └── icons/
+├── src/
+│   ├── background/
+│   ├── constants/
+│   ├── content/
+│   ├── options/
+│   ├── popup/
+│   ├── services/
+│   └── utils/
+├── tests/
+└── dist/
 ```
 
-## Current scope
+`dist/` is generated by the build process and is the directory loaded into Chrome.
+
+## Current Scope
 
 Quick Converter currently focuses on fast conversions directly from selected webpage text using a compact floating result card.
 
