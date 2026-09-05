@@ -7,6 +7,8 @@
   --qc-ink: #f5f5f7;
   --qc-muted: #a0a0a8;
   --qc-border: #303030;
+  --qc-swap-bg: #1a1a1a;
+  --qc-swap-hover-bg: #1f2238;
   border-color: #343434;
   background: #121212;
   color: var(--qc-ink);
@@ -89,7 +91,7 @@
 
 #quick-converter-result[data-theme="dark"] .qc-swap {
   border-color: #3f47a8;
-  background: #1a1a1a;
+  background: var(--qc-swap-bg);
   color: var(--qc-accent-strong);
   box-shadow:
     0 8px 20px rgba(75, 85, 255, 0.16),
@@ -98,7 +100,7 @@
 
 #quick-converter-result[data-theme="dark"] .qc-swap:hover {
   border-color: var(--qc-accent);
-  background: #1f2238;
+  background: var(--qc-swap-hover-bg);
 }
 
 #quick-converter-result[data-theme="dark"] .qc-swap::before,
