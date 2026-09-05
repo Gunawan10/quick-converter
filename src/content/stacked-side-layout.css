@@ -1,10 +1,9 @@
 #quick-converter-result .qc-main.qc-main--stacked {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 48px;
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 34px auto;
   align-items: stretch;
-  column-gap: 14px;
-  row-gap: 14px;
+  row-gap: 8px;
   padding: 18px;
   text-align: left;
 }
@@ -21,12 +20,32 @@
   grid-row: 1;
 }
 
-#quick-converter-result .qc-main.qc-main--stacked .qc-value-block--result {
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap {
   grid-column: 1;
   grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  border-radius: 9px;
+  background: var(--qc-surface-soft, #f8fafc);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap:hover {
+  background: var(--qc-surface-hover, #f1f5f9);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-swap-icon {
+  transform: rotate(90deg);
+}
+
+#quick-converter-result .qc-main.qc-main--stacked .qc-value-block--result {
+  grid-column: 1;
+  grid-row: 3;
   align-items: flex-start;
-  padding-top: 14px;
-  border-top: 1px solid var(--qc-border);
+  padding-top: 0;
+  border-top: 0;
   text-align: left;
 }
 
@@ -45,20 +64,6 @@
   color: var(--qc-accent-strong);
 }
 
-#quick-converter-result .qc-main.qc-main--stacked .qc-swap {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  align-self: center;
-  justify-self: center;
-  width: 40px;
-  height: 40px;
-  margin: 0;
-}
-
-#quick-converter-result .qc-main.qc-main--stacked .qc-swap-icon {
-  transform: rotate(90deg);
-}
-
 #quick-converter-result .qc-main.qc-main--stacked .qc-swap::before,
 #quick-converter-result .qc-main.qc-main--stacked .qc-swap::after {
   display: none;
@@ -67,18 +72,13 @@
 
 @media (max-width: 380px) {
   #quick-converter-result .qc-main.qc-main--stacked {
-    grid-template-columns: minmax(0, 1fr) 44px;
-    column-gap: 10px;
-    row-gap: 12px;
+    grid-template-rows: auto 32px auto;
+    row-gap: 7px;
     padding: 16px;
   }
 
-  #quick-converter-result .qc-main.qc-main--stacked .qc-value-block--result {
-    padding-top: 12px;
-  }
-
   #quick-converter-result .qc-main.qc-main--stacked .qc-swap {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 }
