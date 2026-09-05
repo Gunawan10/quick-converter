@@ -43,6 +43,11 @@ input {
   flex: none;
 }
 
+.brand-copy {
+  min-width: 0;
+  flex: 1;
+}
+
 .brand-header h1 {
   margin: 0;
   font-size: 18px;
@@ -56,6 +61,14 @@ input {
   color: #7d86a2;
   font-size: 11px;
   line-height: 1.4;
+}
+
+.header-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  cursor: pointer;
 }
 
 .settings-section {
