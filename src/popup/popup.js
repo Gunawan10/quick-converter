@@ -23,8 +23,11 @@ const DEFAULT_SETTINGS = {
     data: 'MB'
   },
   showProviderMeta: true,
+  theme: 'system',
   numberFormat: 'auto'
 };
+
+const systemTheme = matchMedia('(prefers-color-scheme: dark)');
 
 const elements = {
   settingsCard: document.querySelector('.settings-card'),
@@ -37,6 +40,7 @@ const elements = {
   targetTemperature: document.querySelector('#targetTemperature'),
   targetData: document.querySelector('#targetData'),
   showProviderMeta: document.querySelector('#showProviderMeta'),
+  theme: document.querySelector('#theme'),
   numberFormat: document.querySelector('#numberFormat'),
   version: document.querySelector('#version')
 };
@@ -54,6 +58,7 @@ const secondaryControls = [
   elements.targetTemperature,
   elements.targetData,
   elements.showProviderMeta,
+  elements.theme,
   elements.numberFormat,
   ...converterInputs
 ];
@@ -97,6 +102,7 @@ async function loadSettings() {
     'targetCurrency',
     'targetUnits',
     'showProviderMeta',
+    'theme',
     'numberFormat'
   ]);
 
@@ -122,12 +128,14 @@ async function loadSettings() {
   elements.targetTemperature.value = settings.targetUnits.temperature;
   elements.targetData.value = settings.targetUnits.data;
   elements.showProviderMeta.checked = settings.showProviderMeta;
+  elements.theme.value = settings.theme;
   elements.numberFormat.value = settings.numberFormat;
 
   for (const input of converterInputs) {
     input.checked = settings.enabledConverters[input.dataset.converter] !== false;
   }
 
+  applyTheme(settings.theme);
   applyExtensionState(elements.extensionEnabled.checked);
 }
 
@@ -176,6 +184,11 @@ function bindEvents() {
     saveSetting('showProviderMeta', elements.showProviderMeta.checked);
   });
 
+  elements.theme.addEventListener('change', async () => {
+    applyTheme(elements.theme.value);
+    await saveSetting('theme', elements.theme.value);
+  });
+
   elements.numberFormat.addEventListener('change', () => {
     saveSetting('numberFormat', elements.numberFormat.value);
   });
@@ -194,6 +207,20 @@ function bindEvents() {
       });
     });
   }
+
+  systemTheme.addEventListener('change', () => {
+    if (elements.theme.value === 'system') {
+      applyTheme('system');
+    }
+  });
+}
+
+function applyTheme(theme) {
+  const resolved = theme === 'system'
+    ? (systemTheme.matches ? 'dark' : 'light')
+    : theme;
+
+  document.body.dataset.theme = resolved;
 }
 
 function applyExtensionState(enabled) {
