@@ -50,20 +50,29 @@
 
     main.classList.remove(
       'qc-main--currency',
-      'qc-main--stacked'
+      'qc-main--stacked',
+      'qc-main--compact-values'
     );
 
+    const sourceText = source.textContent?.trim() || '';
+    const resultText = result.textContent?.trim() || '';
+    const longestValue = Math.max(sourceText.length, resultText.length);
+    const combinedLength = sourceText.length + resultText.length;
+
+    // Keep ordinary conversions horizontal. The old overflow-only check
+    // switched to vertical too early because both sides shared equal width.
     const shouldStack =
-      isOverflowing(source) ||
-      isOverflowing(result);
+      longestValue > 18 ||
+      combinedLength > 26;
 
     if (shouldStack) {
       main.classList.add('qc-main--stacked');
+      return;
     }
-  }
 
-  function isOverflowing(element) {
-    return element.scrollWidth > element.clientWidth + 1;
+    if (longestValue > 12) {
+      main.classList.add('qc-main--compact-values');
+    }
   }
 
   globalThis.QuickConverterContent = {
