@@ -91,26 +91,11 @@
       </div>
 
       <div class="select-list">
-        <label class="select-row">
-          <span>Currency</span>
-          <select id="targetCurrency"></select>
-        </label>
-        <label class="select-row">
-          <span>Length</span>
-          <select id="targetLength"></select>
-        </label>
-        <label class="select-row">
-          <span>Weight</span>
-          <select id="targetWeight"></select>
-        </label>
-        <label class="select-row">
-          <span>Temperature</span>
-          <select id="targetTemperature"></select>
-        </label>
-        <label class="select-row">
-          <span>Data</span>
-          <select id="targetData"></select>
-        </label>
+        <label class="select-row"><span>Currency</span><select id="targetCurrency"></select></label>
+        <label class="select-row"><span>Length</span><select id="targetLength"></select></label>
+        <label class="select-row"><span>Weight</span><select id="targetWeight"></select></label>
+        <label class="select-row"><span>Temperature</span><select id="targetTemperature"></select></label>
+        <label class="select-row"><span>Data</span><select id="targetData"></select></label>
       </div>
     </section>
 
@@ -126,6 +111,18 @@
         </span>
         <input id="showProviderMeta" class="switch-input" type="checkbox">
         <span class="switch" aria-hidden="true"></span>
+      </label>
+
+      <label class="select-row display-select">
+        <span>
+          <strong>Theme</strong>
+          <small>Choose how Quick Converter looks.</small>
+        </span>
+        <select id="theme">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
       </label>
 
       <label class="select-row display-select">
