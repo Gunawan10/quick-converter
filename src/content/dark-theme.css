@@ -17,6 +17,22 @@
     0 5px 16px rgba(0, 0, 0, 0.22);
 }
 
+#quick-converter-trigger[data-theme="dark"] {
+  border-color: #343434;
+  background: #1a1a1a;
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.34),
+    0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+#quick-converter-trigger[data-theme="dark"]:hover {
+  border-color: #4b55ff;
+  background: #232323;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.38),
+    0 1px 5px rgba(75, 85, 255, 0.18);
+}
+
 #quick-converter-result[data-theme="dark"] .qc-header {
   border-bottom-color: var(--qc-border);
   background: #161616;
