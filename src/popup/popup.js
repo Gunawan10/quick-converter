@@ -5,6 +5,7 @@ import {
 import { UNIT_TYPES } from '../constants/units.js';
 
 const DEFAULT_SETTINGS = {
+  extensionEnabled: true,
   showSelectionIcon: true,
   copyResultOnClick: true,
   enabledConverters: {
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const elements = {
+  extensionEnabled: document.querySelector('#extensionEnabled'),
   showSelectionIcon: document.querySelector('#showSelectionIcon'),
   copyResultOnClick: document.querySelector('#copyResultOnClick'),
   targetCurrency: document.querySelector('#targetCurrency'),
@@ -74,6 +76,7 @@ function populateUnitOptions(type, select) {
 
 async function loadSettings() {
   const stored = await chrome.storage.local.get([
+    'extensionEnabled',
     'showSelectionIcon',
     'copyResultOnClick',
     'enabledConverters',
@@ -96,6 +99,7 @@ async function loadSettings() {
     }
   };
 
+  elements.extensionEnabled.checked = settings.extensionEnabled !== false;
   elements.showSelectionIcon.checked = settings.showSelectionIcon;
   elements.copyResultOnClick.checked = settings.copyResultOnClick;
   elements.targetCurrency.value = settings.targetCurrency;
@@ -112,6 +116,10 @@ async function loadSettings() {
 }
 
 function bindEvents() {
+  elements.extensionEnabled.addEventListener('change', () => {
+    saveSetting('extensionEnabled', elements.extensionEnabled.checked);
+  });
+
   elements.showSelectionIcon.addEventListener('change', () => {
     saveSetting('showSelectionIcon', elements.showSelectionIcon.checked);
   });
