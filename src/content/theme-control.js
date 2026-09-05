@@ -41,7 +41,13 @@
   });
 
   function applyTheme() {
+    const resolvedTheme = resolveTheme(preferredTheme);
     const card = document.getElementById('quick-converter-result');
+    const trigger = document.getElementById('quick-converter-trigger');
+
+    if (trigger) {
+      trigger.dataset.theme = resolvedTheme;
+    }
 
     if (!card) {
       return;
@@ -57,7 +63,7 @@
       }
     }
 
-    card.dataset.theme = resolveTheme(preferredTheme);
+    card.dataset.theme = resolvedTheme;
   }
 
   function resolveTheme(theme) {
