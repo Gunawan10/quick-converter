@@ -3,7 +3,10 @@ import {
   DEFAULT_CURRENCY,
   getCurrencyFromLocale
 } from '../constants/currencies.js';
-import { UNIT_TYPES } from '../constants/units.js';
+import {
+  UNIT_TYPES,
+  getDefaultTarget
+} from '../constants/units.js';
 import { parseSelection } from '../utils/selection-parser.js';
 import { convert } from '../services/converter.js';
 
@@ -159,15 +162,29 @@ async function getTargetCurrency(locale) {
   return getCurrencyFromLocale(browserLocale) || DEFAULT_CURRENCY;
 }
 
+async function getTargetUnit(type) {
+  const { targetUnits = {} } =
+    await chrome.storage.local.get('targetUnits');
+  const storedTarget = targetUnits[type];
+
+  if (storedTarget && UNIT_TYPES[type]?.units?.[storedTarget]) {
+    return storedTarget;
+  }
+
+  return getDefaultTarget(type);
+}
+
 async function initializeSettings(reason) {
   const {
     targetCurrency,
     currencyPreferenceSet,
-    extensionEnabled
+    extensionEnabled,
+    targetUnits = {}
   } = await chrome.storage.local.get([
     'targetCurrency',
     'currencyPreferenceSet',
-    'extensionEnabled'
+    'extensionEnabled',
+    'targetUnits'
   ]);
 
   const updates = {};
@@ -185,6 +202,25 @@ async function initializeSettings(reason) {
     typeof currencyPreferenceSet === 'undefined'
   ) {
     updates.currencyPreferenceSet = false;
+  }
+
+  const defaultTargetUnits = Object.fromEntries(
+    Object.keys(UNIT_TYPES).map((type) => [
+      type,
+      getDefaultTarget(type)
+    ])
+  );
+  const mergedTargetUnits = {
+    ...defaultTargetUnits,
+    ...targetUnits
+  };
+
+  if (
+    Object.keys(defaultTargetUnits).some(
+      (type) => targetUnits[type] !== mergedTargetUnits[type]
+    )
+  ) {
+    updates.targetUnits = mergedTargetUnits;
   }
 
   if (Object.keys(updates).length) {
@@ -303,9 +339,11 @@ async function handleConversion(text, locale) {
   }
 
   try {
-    return await convert(parsed, {
-      targetCurrency: await getTargetCurrency(locale)
-    });
+    const options = parsed.type === 'currency'
+      ? { targetCurrency: await getTargetCurrency(locale) }
+      : { targetUnit: await getTargetUnit(parsed.type) };
+
+    return await convert(parsed, options);
   } catch (error) {
     console.error('[Quick Converter] Conversion error:', error);
 
