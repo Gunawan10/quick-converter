@@ -57,22 +57,25 @@
     const sourceText = source.textContent?.trim() || '';
     const resultText = result.textContent?.trim() || '';
     const longestValue = Math.max(sourceText.length, resultText.length);
-    const combinedLength = sourceText.length + resultText.length;
-
-    // Keep ordinary conversions horizontal. The old overflow-only check
-    // switched to vertical too early because both sides shared equal width.
-    const shouldStack =
-      longestValue > 18 ||
-      combinedLength > 26;
-
-    if (shouldStack) {
-      main.classList.add('qc-main--stacked');
-      return;
-    }
 
     if (longestValue > 12) {
       main.classList.add('qc-main--compact-values');
     }
+
+    // Use actual rendered width instead of character-count guesses.
+    // If either value would be clipped in horizontal mode, switch to vertical.
+    const shouldStack =
+      isOverflowing(source) ||
+      isOverflowing(result);
+
+    if (shouldStack) {
+      main.classList.remove('qc-main--compact-values');
+      main.classList.add('qc-main--stacked');
+    }
+  }
+
+  function isOverflowing(element) {
+    return element.scrollWidth > element.clientWidth + 1;
   }
 
   globalThis.QuickConverterContent = {
